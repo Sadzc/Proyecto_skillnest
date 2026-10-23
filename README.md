@@ -49,81 +49,44 @@ python3 -m pip --version
 
 ### 1.2 Instalar Git
 
-Git permite descargar el repositorio desde GitHub y registrar los cambios del proyecto. Primero debes instalarlo en tu computador; no basta con entrar a la página web de Git.
+Git permite clonar el repositorio desde GitHub y registrar los cambios del proyecto. Si ya está instalado, puedes omitir este paso.
 
-#### Windows
+**Windows**
 
-**Paso 1. Descargar Git**
-
-Entra a la página oficial:
-
-https://git-scm.com/install/
-
-Busca la sección de Windows y descarga el instalador correspondiente.
-
-**Paso 2. Instalar Git**
-
-1. Abre el archivo instalador que descargaste.
-2. Sigue los pasos del asistente de instalación.
-3. Si no sabes qué opciones elegir, puedes mantener las opciones predeterminadas.
-4. Finaliza la instalación.
-
-No necesitas escribir comandos de instalación en la terminal de Windows: en este caso, Git se instala ejecutando el archivo descargado.
-
-**Paso 3. Abrir una terminal**
-
-Una vez instalado, abre una terminal nueva. Puedes usar cualquiera de estas opciones:
-
-- **PowerShell:** búscalo en el menú Inicio de Windows.
-- **Git Bash:** si quedó instalado, puedes abrirlo desde el menú Inicio.
-- **Terminal de VS Code:** abre VS Code y selecciona *Terminal → Nueva terminal*.
-
-**Paso 4. Verificar la instalación**
-
-Escribe el siguiente comando y presiona Enter:
+1. Descarga Git desde la [página oficial](https://git-scm.com/install/).
+2. Ejecuta el instalador y mantén las opciones predeterminadas si no sabes cuáles elegir.
+3. Abre PowerShell, Git Bash o la terminal de VS Code y verifica la instalación:
 
 ```bash
 git --version
 ```
 
-Si aparece un resultado similar a `git version 2.x.x`, Git está instalado correctamente.
+Como alternativa, puedes instalar Git desde PowerShell si tienes `winget` disponible:
 
-Si Windows indica que `git` no se reconoce como comando, cierra y vuelve a abrir la terminal. Si el problema continúa, revisa la instalación de Git.
+```powershell
+winget install --id Git.Git -e
+```
 
-#### Ubuntu / WSL
-
-Si trabajas desde Ubuntu o WSL, abre la terminal y ejecuta:
+**Ubuntu / WSL**
 
 ```bash
 sudo apt update
 sudo apt install git
-```
-
-Si solicita confirmación, escribe `Y` y presiona Enter.
-
-Después verifica la instalación:
-
-```bash
 git --version
 ```
 
-#### macOS
+**macOS**
 
-Descarga Git desde https://git-scm.com/install/ o instala las herramientas de línea de comandos de Apple desde la terminal:
+Abre la terminal y ejecuta:
 
 ```bash
 xcode-select --install
-```
-
-Cuando termine la instalación, verifica con:
-
-```bash
 git --version
 ```
 
-#### ¿Qué sigue?
+Si aparece un número de versión, Git está disponible. Si acabas de instalarlo y no se reconoce el comando, abre una terminal nueva y vuelve a intentarlo.
 
-Una vez que Git esté instalado y el comando `git --version` funcione, continúa con la sección de clonación del repositorio para descargar el proyecto desde GitHub.
+**Siguiente paso:** continúa con la clonación del repositorio desde GitHub.
 
 ### 1.3 Editor opcional
 
