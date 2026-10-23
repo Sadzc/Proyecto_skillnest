@@ -126,13 +126,28 @@ Ejecuta:
 git status
 ```
 
-Deberías ver el estado de la rama y no un error indicando que no existe un repositorio Git.
+Deberías ver el nombre de la rama (`On branch main`) y no un error indicando que no existe un repositorio Git. Si el repositorio está limpio, `git status` no lista archivos; eso es correcto.
 
-Comprueba también que los archivos principales estén presentes:
+**Verificar que los archivos principales están presentes**
 
-- `README.md`
-- `requirements.txt`
-- `.env.example`
+Lista el contenido de la carpeta:
+
+**macOS, Linux y WSL:**
+```bash
+ls -la
+```
+
+**Windows PowerShell:**
+```powershell
+Get-ChildItem
+```
+
+**Windows CMD:**
+```cmd
+dir
+```
+
+Deberías ver entre los archivos: `README.md`, `requirements.txt` y `.env.example`.
 
 Si prefieres descargar el proyecto como ZIP desde GitHub, puedes hacerlo desde la opción **Code → Download ZIP**. Sin embargo, esa descarga no incluye el historial Git necesario para realizar todas las comprobaciones de esta guía. Para seguir el flujo completo, utiliza `git clone`.
 
