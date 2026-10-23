@@ -1,12 +1,18 @@
 import os
 import requests
 import time
+import json
+from datetime import datetime
 from dotenv import load_dotenv
+from pathlib import Path
 
 load_dotenv()
 
 URL_BASE = "https://generativelanguage.googleapis.com/v1beta/models/"
-ARCHIVO_SALIDA = "../docs/respuestas_completas.md"
+
+RAIZ = Path(__file__).resolve().parent.parent
+CARPETA_RESULTADOS = RAIZ / "docs" / "resultados"
+ARCHIVO_REGISTRO = CARPETA_RESULTADOS / "registro_ejecuciones.jsonl"
 
 # 1. Función: Validar y armar la petición
 def armar_peticion(pregunta, modelo):
@@ -79,7 +85,7 @@ def ejecutar_prueba(pregunta, modelo, precio_entrada, precio_salida):
     datos, latencia = enviar_peticion(url, body)
     costo = calcular_costo(datos, precio_entrada, precio_salida)
     respuesta = extraer_texto(datos)
-    return latencia, costo, respuesta, datos.get("modelVersion")
+    return latencia, costo, respuesta, datos.get("modelVersion"), datos.get("usageMetadata", {})
 
 # Ejecución Principal
 if __name__ == "__main__":
@@ -99,11 +105,19 @@ if __name__ == "__main__":
 
     resultados = {m: [] for m in modelos_a_comparar}
 
-    # Empieza el archivo de cero en cada corrida (así no se acumulan corridas)
+    # Registro de cada ejecución en archivos separados, sin sobrescribir ejecuciones anteriores
+    CARPETA_RESULTADOS.mkdir(parents=True, exist_ok=True)
+    id_ejecucion = datetime.now().strftime("%Y%m%d_%H%M%S_%f")
+    ARCHIVO_SALIDA = CARPETA_RESULTADOS / f"respuestas_{id_ejecucion}.md"
+    inicio_ejecucion = datetime.now().astimezone().isoformat(timespec="seconds")
+
     with open(ARCHIVO_SALIDA, "w", encoding="utf-8") as f:
-        f.write(f"# Respuestas completas ({time.strftime('%Y-%m-%d %H:%M')})\n\n")
+        f.write(f"# Respuestas completas ({inicio_ejecucion})\n\n")
+        f.write(f"**ID de ejecución:** {id_ejecucion}\n\n")
 
     print("=== INICIANDO COMPARATIVA DE MODELOS ===\n")
+    print(f"Informe de esta ejecución: {ARCHIVO_SALIDA.relative_to(RAIZ)}")
+    print(f"Registro acumulativo: {ARCHIVO_REGISTRO.relative_to(RAIZ)}\n")
 
     for nombre_modelo, precios in modelos_a_comparar.items():
         print("-" * 50)
@@ -111,11 +125,32 @@ if __name__ == "__main__":
         print("-" * 50)
 
         for i, pregunta in enumerate(preguntas_prueba, 1):
+            fecha_resultado = datetime.now().astimezone().isoformat(timespec="seconds")
+            registro = {
+                "id_ejecucion": id_ejecucion,
+                "fecha": fecha_resultado,
+                "modelo_solicitado": nombre_modelo,
+                "pregunta_numero": i,
+                "pregunta": pregunta,
+                "precio_entrada_usd_por_token": precios["in"],
+                "precio_salida_usd_por_token": precios["out"],
+            }
+
             try:
-                lat, costo, resp, version = ejecutar_prueba(
+                lat, costo, resp, version, uso = ejecutar_prueba(
                     pregunta, nombre_modelo, precios["in"], precios["out"]
                 )
                 resultados[nombre_modelo].append((i, lat, costo))
+
+                registro.update({
+                    "estado": "ok",
+                    "modelo_respuesta": version,
+                    "latencia_segundos": round(lat, 6),
+                    "costo_usd_estimado": costo,
+                    "uso_tokens": uso,
+                    "respuesta": resp.strip(),
+                    "error": None,
+                })
 
                 print(f"  [Pregunta {i}]")
                 print(f"    - Modelo que respondió: {version}")
@@ -129,9 +164,21 @@ if __name__ == "__main__":
                     f.write(f"Modelo que respondió: {version} | Latencia: {lat:.2f} s | Costo: ${costo:.6f} USD\n\n")
                     f.write(f"{resp.strip()}\n\n---\n\n")
             except Exception as e:
+                registro.update({
+                    "estado": "error",
+                    "modelo_respuesta": None,
+                    "latencia_segundos": None,
+                    "costo_usd_estimado": None,
+                    "uso_tokens": None,
+                    "respuesta": None,
+                    "error": str(e),
+                })
                 print(f"  [Pregunta {i}] Falló: {e}\n")
                 with open(ARCHIVO_SALIDA, "a", encoding="utf-8") as f:
                     f.write(f"## {nombre_modelo} - Pregunta {i}\n\nFalló: {e}\n\n---\n\n")
+
+            with open(ARCHIVO_REGISTRO, "a", encoding="utf-8") as f:
+                f.write(json.dumps(registro, ensure_ascii=False) + "\n")
 
             # Pausa contra el Error 429
             time.sleep(15)
@@ -151,3 +198,5 @@ if __name__ == "__main__":
         preguntas_ok = [f[0] for f in filas]
         print(f"{nombre_modelo}: {n}/{len(preguntas_prueba)} OK (preguntas {preguntas_ok}) | "
               f"latencia prom. {lat_prom:.2f} s | costo prom. ${costo_prom:.6f} USD")
+    print(f"\nInforme guardado en: {ARCHIVO_SALIDA}")
+    print(f"Registro acumulativo guardado en: {ARCHIVO_REGISTRO}")
