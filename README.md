@@ -1,289 +1,215 @@
 # Asistente de Documentación de Data Warehouse
 
-Este repositorio contiene el desarrollo de un asistente inteligente para consultar documentación de un Data Warehouse mediante modelos de lenguaje y técnicas de RAG (*Retrieval-Augmented Generation*). El proyecto forma parte de la Especialización en Desarrollo con IA Generativa de Skillnest y Accenture.
+## 1. Descripción del proyecto
 
-La solución busca responder preguntas sobre columnas, modelos y métricas de negocio utilizando documentación como archivos `schema.yml`, descripciones de modelos dbt y definiciones de KPIs, citando las fuentes utilizadas e identificando posibles brechas de documentación.
+Este repositorio contiene un asistente para trabajar con documentación de un Data Warehouse mediante modelos de lenguaje y técnicas de RAG (*Retrieval-Augmented Generation*). El proyecto forma parte de la Especialización en Desarrollo con IA Generativa de Skillnest y Accenture.
 
-Esta guía está pensada para personas con o sin experiencia en programación. Puedes configurar y ejecutar el proyecto de dos maneras:
+La propuesta consiste en responder preguntas sobre columnas, modelos y métricas de negocio a partir de documentación como archivos `schema.yml`, descripciones de modelos dbt y definiciones de KPI, citando fuentes e identificando posibles brechas de documentación.
 
-- **Camino A — VS Code:** utiliza una interfaz visual y una terminal integrada.
-- **Camino B — Terminal:** permite realizar todo el proceso mediante comandos, sin necesidad de instalar VS Code.
+Esta guía explica cómo preparar y ejecutar el proyecto en Windows, macOS, Ubuntu, otras distribuciones Linux y WSL. Puedes trabajar con VS Code o solo con una terminal; VS Code es opcional.
 
-Ambos caminos permiten preparar el proyecto. Elige uno para comenzar; no necesitas completar los dos.
+## 2. Requisitos previos
 
----
+Necesitas:
 
-## 1. Herramientas necesarias
+- **Python 3**, en una versión compatible con las dependencias del proyecto. El repositorio no especifica aquí una versión mínima única; revisa los requisitos de las bibliotecas si aparece un error de compatibilidad.
+- **Git**, para clonar el repositorio y gestionar cambios.
+- **Acceso a Internet**, para clonar el proyecto, instalar dependencias y consultar servicios externos.
+- **Una clave de API de Gemini**, para los scripts que realizan solicitudes al modelo.
+- **Visual Studio Code (opcional)**, si prefieres una interfaz gráfica y una terminal integrada.
 
-Antes de comenzar, necesitas:
+### 2.1. Comprobar Python
 
-- **Python 3:** permite ejecutar el código del proyecto.
-- **pip:** instala las dependencias de Python.
-- **Git:** descarga el repositorio y permite gestionar los cambios.
-- **Clave de API de Gemini:** necesaria para los scripts que realizan consultas al modelo.
-- **VS Code:** opcional; se utiliza en el Camino A.
-
-También necesitarás conexión a Internet para descargar el proyecto, instalar las dependencias y realizar consultas a la API.
-
-### 1.1. Instalar y comprobar Python
-
-Python es el lenguaje utilizado por el proyecto. Primero comprueba si ya está instalado.
-
-**Windows — PowerShell**
-
-Abre PowerShell y ejecuta:
+**Windows — PowerShell o CMD:**
 
 ```powershell
 python --version
 ```
 
-Si aparece un mensaje indicando que no se reconoce el comando, prueba:
+Si `python` no se reconoce en Windows, prueba el comando `py`:
 
 ```powershell
 py --version
 ```
 
-**Windows — CMD (Símbolo del sistema)**
-
-Abre CMD y ejecuta:
-
-```cmd
-python --version
-```
-
-Si no funciona, prueba:
-
-```cmd
-py --version
-```
-
-Si ninguno funciona, instala Python desde [python.org](https://www.python.org/downloads/). Durante la instalación, si aparece la opción **Add Python to PATH**, actívala. Después, cierra y vuelve a abrir la terminal.
-
-**macOS — Terminal**
+**macOS, Ubuntu, Linux y WSL:**
 
 ```bash
 python3 --version
 ```
 
-Si Python no está instalado, utiliza el instalador oficial de [Python](https://www.python.org/downloads/).
+El comando debe mostrar una versión instalada. Si falla, instala Python desde [python.org](https://www.python.org/downloads/) y revisa la configuración de `PATH` cuando corresponda.
 
-**Linux — Ubuntu**
-
-```bash
-python3 --version
-```
-
-Si no está instalado, ejecuta:
+En Ubuntu/WSL, si faltan Python, `pip` o los componentes para crear entornos virtuales:
 
 ```bash
 sudo apt update
 sudo apt install python3 python3-venv python3-pip
 ```
 
-Introduce tu contraseña si Ubuntu la solicita. Mientras escribes la contraseña en la terminal, es normal que no aparezcan caracteres en pantalla.
+Estos comandos con `apt` son para distribuciones basadas en Debian/Ubuntu; no se usan en Windows nativo ni en macOS. En WSL, Python debe estar instalado dentro de la distribución Linux que vayas a utilizar: la instalación de Windows es independiente.
 
-**Si utilizas WSL:** WSL permite ejecutar Linux dentro de Windows. Python instalado en Windows no queda instalado automáticamente dentro de Ubuntu/WSL.
+### 2.2. Comprobar Git
 
-Una respuesta como `Python 3.12.4` indica que Python está disponible. El número de versión puede ser diferente.
-
-### 1.2. Instalar y comprobar Git
-
-Git permite descargar el proyecto desde GitHub.
-
-Descárgalo desde [git-scm.com/downloads](https://git-scm.com/downloads) si todavía no lo tienes instalado.
-
-**Windows — PowerShell o CMD**
-
-```powershell
-git --version
-```
-
-Si no está instalado, puedes descargarlo desde la página oficial o, si tu sistema dispone de `winget`, ejecutar en PowerShell:
-
-```powershell
-winget install --id Git.Git -e
-```
-
-Después, cierra y vuelve a abrir la terminal.
-
-**macOS — Terminal**
+**Windows, macOS, Ubuntu, Linux y WSL:**
 
 ```bash
 git --version
 ```
 
-Si macOS indica que necesitas herramientas de desarrollo, puedes ejecutar:
+Debe aparecer la versión instalada. Si Git no está disponible:
+
+- **Windows:** instala Git desde [git-scm.com/downloads](https://git-scm.com/downloads). Si `winget` está disponible, puedes usar PowerShell:
+
+  ```powershell
+  winget install --id Git.Git -e
+  ```
+
+- **macOS:** puedes instalar las herramientas de línea de comandos con:
+
+  ```bash
+  xcode-select --install
+  ```
+
+  También puedes instalar Git mediante otro método compatible con macOS.
+
+- **Ubuntu/WSL:**
+
+  ```bash
+  sudo apt update
+  sudo apt install git
+  ```
+
+Después de instalarlo, cierra y vuelve a abrir la terminal y ejecuta `git --version` otra vez.
+
+### 2.3. Instalar VS Code (opcional)
+
+Si quieres utilizar el editor, descárgalo desde [code.visualstudio.com](https://code.visualstudio.com/). No es obligatorio: el proyecto también puede prepararse y ejecutarse desde una terminal.
+
+## 3. Obtener el proyecto
+
+Repositorio: [https://github.com/Sadzc/Proyecto_skillnest.git](https://github.com/Sadzc/Proyecto_skillnest.git)
+
+Elige **una** de estas alternativas. No necesitas clonar el repositorio de las dos maneras.
+
+### 3.1. Alternativa A: clonar con VS Code
+
+1. Instala y abre Visual Studio Code.
+2. Abre la paleta de comandos:
+   - Windows y Linux: `Ctrl + Shift + P`.
+   - macOS: `Cmd + Shift + P`.
+3. Busca y selecciona `Git: Clone`.
+4. Introduce la URL:
+
+   ```text
+   https://github.com/Sadzc/Proyecto_skillnest.git
+   ```
+
+5. Elige la carpeta **padre** donde guardarás el proyecto, por ejemplo, una carpeta de proyectos o Documentos.
+6. Espera a que termine la clonación.
+7. Cuando VS Code lo solicite, abre la carpeta clonada **`Proyecto_skillnest`**, no solamente la carpeta padre.
+8. Abre una terminal integrada desde el menú **Terminal → New Terminal / Nueva terminal**.
+9. Ejecuta:
+
+   ```bash
+   git status
+   ```
+
+Git debería mostrar información del repositorio, incluida la rama actual y el estado de los archivos. Si el repositorio no tiene cambios pendientes, puede aparecer `nothing to commit, working tree clean`.
+
+### 3.2. Alternativa B: clonar desde una terminal
+
+Antes de clonar, comprueba la ubicación actual y decide dónde guardar el repositorio.
+
+**PowerShell, macOS, Linux y WSL:**
 
 ```bash
-xcode-select --install
+pwd
 ```
 
-Sigue las instrucciones que aparezcan en pantalla.
-
-**Linux — Ubuntu**
-
-```bash
-git --version
-```
-
-Si no está instalado:
-
-```bash
-sudo apt update
-sudo apt install git
-```
-
-Para comprobar que todo quedó correctamente instalado, vuelve a ejecutar `git --version`. Deberías ver un número de versión.
-
-### 1.3. Instalar VS Code (opcional)
-
-Si utilizarás el Camino A, descarga Visual Studio Code desde:
-
-[https://code.visualstudio.com/download](https://code.visualstudio.com/download)
-
-Si prefieres trabajar exclusivamente con terminal, puedes omitir este paso.
-
----
-
-## 2. Obtener el proyecto
-
-Repositorio de GitHub:
-
-[https://github.com/Sadzc/Proyecto_skillnest](https://github.com/Sadzc/Proyecto_skillnest)
-
-### Camino A — Descargar el proyecto mediante VS Code
-
-**Paso 1. Abre VS Code.**
-
-Inicia Visual Studio Code desde el menú de aplicaciones de tu sistema operativo.
-
-**Paso 2. Abre la paleta de comandos.**
-
-- Windows y Linux: presiona `Ctrl + Shift + P`.
-- macOS: presiona `Cmd + Shift + P`.
-
-Aparecerá una barra de búsqueda en la parte superior de la ventana.
-
-**Paso 3. Busca Git Clone.**
-
-Escribe:
-
-```text
-Git: Clone
-```
-
-Selecciona la opción que aparezca en los resultados.
-
-**Paso 4. Introduce la dirección del repositorio.**
-
-Copia y pega esta dirección:
-
-```text
-https://github.com/Sadzc/Proyecto_skillnest.git
-```
-
-Presiona Enter.
-
-**Paso 5. Elige dónde guardar el proyecto.**
-
-VS Code abrirá una ventana para seleccionar la carpeta de destino. Elige una ubicación fácil de encontrar, como Documentos o una carpeta de proyectos.
-
-Espera a que termine la descarga.
-
-**Paso 6. Abre el repositorio.**
-
-Si VS Code pregunta si quieres abrir el repositorio clonado, selecciona **Open** o **Abrir**.
-
-Deberías ver el contenido del proyecto en el panel izquierdo.
-
-Si el repositorio es privado, necesitarás autorización y autenticarte con una cuenta que tenga acceso.
-
-### Camino B — Descargar el proyecto desde la terminal
-
-Primero, abre una terminal:
-
-- **Windows:** busca PowerShell o CMD en el menú Inicio.
-- **macOS:** abre Terminal desde Aplicaciones o Spotlight.
-- **Ubuntu:** abre Terminal desde el menú de aplicaciones.
-- **WSL:** abre tu distribución Ubuntu.
-
-Ejecuta el siguiente comando, según tu sistema.
-
-**Windows — PowerShell**
-
-```powershell
-git clone https://github.com/Sadzc/Proyecto_skillnest.git
-cd Proyecto_skillnest
-```
-
-**Windows — CMD (Símbolo del sistema)**
+**CMD de Windows:**
 
 ```cmd
-git clone https://github.com/Sadzc/Proyecto_skillnest.git
-cd Proyecto_skillnest
+cd
 ```
 
-**macOS, Linux o WSL — Terminal**
+Estos comandos muestran la ubicación actual. Si quieres cambiar de carpeta antes de clonar, puedes usar los siguientes ejemplos **solo si esas rutas existen en tu equipo**.
+
+**PowerShell — ejemplo de Documentos:**
+
+```powershell
+Set-Location "$HOME\Documents"
+```
+
+**CMD — ejemplo de Documentos:**
+
+```cmd
+cd /d "%USERPROFILE%\Documents"
+```
+
+**macOS, Linux y WSL — ejemplo de Documentos:**
+
+```bash
+cd ~/Documents
+```
+
+La carpeta Documentos puede tener otro nombre, estar redirigida a OneDrive o encontrarse en una ubicación personalizada. Si la ruta del ejemplo no existe, utiliza la ruta real de la carpeta donde quieres guardar el proyecto.
+
+Una vez elegida la ubicación, ejecuta estos comandos en PowerShell, CMD, macOS, Linux o WSL:
 
 ```bash
 git clone https://github.com/Sadzc/Proyecto_skillnest.git
 cd Proyecto_skillnest
-```
-
-El primer comando descarga el repositorio en una carpeta llamada `Proyecto_skillnest`. El segundo entra en esa carpeta.
-
-Si aparece un error que indica que `git` no se reconoce, vuelve a la sección 1.2.
-
-Si aparece un error relacionado con permisos o autenticación, comprueba que el repositorio sea accesible para tu cuenta.
-
-### 2.1. Comprueba que descargaste el proyecto
-
-Una vez dentro de la carpeta, ejecuta:
-
-```bash
 git status
 ```
 
-Este comando consulta el estado del repositorio. Si está limpio, verás un mensaje parecido a:
+`git clone` crea la carpeta `Proyecto_skillnest` dentro de la ubicación actual; `cd Proyecto_skillnest` entra en ella. Ejecuta los comandos posteriores desde esa carpeta raíz, salvo que una instrucción indique expresamente otra ubicación.
 
-```text
-On branch main
-Your branch is up to date with 'origin/main'.
+### 3.3. Comprobar que estás en la raíz correcta
 
-nothing to commit, working tree clean
-```
+Para listar los archivos de la ubicación actual:
 
-El texto puede variar si existen cambios locales o si la rama tiene otro nombre.
-
-Ahora comprueba que los archivos se hayan descargado.
-
-**Windows — PowerShell**
+**PowerShell:**
 
 ```powershell
 Get-ChildItem
 ```
 
-**Windows — CMD**
+**CMD:**
 
 ```cmd
 dir
 ```
 
-**macOS, Linux o WSL**
+**macOS, Linux y WSL:**
 
 ```bash
 ls -la
 ```
 
-En la carpeta raíz deberías encontrar archivos como `README.md`, `requirements.txt` y `.env.example`, siempre que formen parte de la versión actual del repositorio.
+En la raíz del proyecto deberían encontrarse, entre otros, `README.md`, `requirements.txt`, `.gitignore` y, en la versión actual consultada, `.env.example`.
 
-Si no los encuentras, comprueba que estés dentro de `Proyecto_skillnest` y no en la carpeta que la contiene.
+Si `git status` devuelve `fatal: not a git repository`, probablemente la terminal está en otra carpeta. Comprueba la ubicación, entra en `Proyecto_skillnest` y vuelve a ejecutar `git status`; no reinstales Git como primera medida.
 
----
+### 3.4. Si ya descargaste el proyecto o no recuerdas dónde está
 
-## 3. Estructura del repositorio
+No vuelvas a clonar el repositorio si ya tienes una copia utilizable.
 
-La siguiente estructura es una referencia de los archivos y directorios del proyecto. Puede variar si se agregan archivos o si algunas carpetas se generan durante la ejecución.
+- En Windows, busca `Proyecto_skillnest` con el Explorador de archivos.
+- En macOS, búscalo con Finder.
+- En Linux/WSL, puedes buscar dentro de tu directorio personal:
+
+  ```bash
+  find ~ -type d -name "Proyecto_skillnest" 2>/dev/null
+  ```
+
+  La búsqueda se limita a `~` y puede no encontrar carpetas guardadas en otros lugares o que no tengas permiso para consultar.
+
+Cuando encuentres la carpeta, entra en ella con `cd` o `Set-Location`, según tu terminal, y ejecuta `git status` para comprobar que estás dentro del repositorio.
+
+## 4. Estructura del repositorio
+
+La estructura que se documenta a continuación debe entenderse como una referencia: los archivos pueden variar entre versiones. Los directorios y archivos de la raíz (`docs/`, `prompts/`, `src/`, `tests/`, `.env.example`, `.gitignore`, `README.md`, `app.py` y `requirements.txt`) aparecen en el repositorio consultado; comprueba los contenidos anidados en tu copia si no coinciden.
 
 ```text
 Proyecto_skillnest/
@@ -308,447 +234,266 @@ Proyecto_skillnest/
 └── requirements.txt
 ```
 
-**Función de los archivos principales**
-
-| Archivo o carpeta | Función |
+| Archivo o carpeta | Propósito documentado o comprobado |
 |---|---|
-| `app.py` | Punto de entrada de la aplicación, según su implementación actual. |
-| `src/consumir_gemini.py` | Realiza una consulta individual a Gemini y gestiona la respuesta y el costo estimado. |
-| `src/consumir_gemini costos_latencia.py` | Script de comparación de modelos y medición de latencia y costo. |
-| `prompts/banco.py` | Banco de prompts del proyecto. |
-| `prompts/test_consistencia.py` | Ejecuta pruebas de consistencia de prompts. |
-| `prompts/registro_resultados.json` | Archivo de resultados de pruebas, si está presente en la versión descargada. |
-| `docs/decision-arquitectura.md` | Documento de decisiones de arquitectura. |
-| `docs/diagrama_arquitectura.png` | Diagrama de arquitectura. |
-| `docs/evidencia_peticion_autenticada.png` | Evidencia visual de una petición autenticada. |
-| `docs/respuestas_completas.md` | Informe de referencia, si está incluido o se genera durante la ejecución. |
-| `docs/resultados/` | Carpeta destinada a informes o resultados, si la versión del script la utiliza. |
-| `.env.example` | Plantilla de configuración sin tu clave personal. |
-| `.env` | Archivo local donde se configura la clave de API. No debe publicarse. |
-| `.gitignore` | Define qué archivos locales debe ignorar Git. |
-| `requirements.txt` | Lista las dependencias de Python. |
-| `.venv/` | Entorno virtual local recomendado para esta guía. No debe subirse a GitHub. |
+| `app.py` | Realiza una solicitud a Gemini e imprime la respuesta en una estructura de salida definida en el código. |
+| `src/consumir_gemini.py` | Contiene funciones para preparar y enviar solicitudes a Gemini y extraer el texto de la respuesta. |
+| `src/consumir_gemini costos_latencia.py` | Compara modelos, mide latencia, estima costos y registra resultados. |
+| `prompts/banco.py` | Define el banco de prompts usado por la prueba de consistencia. |
+| `prompts/test_consistencia.py` | Ejecuta intentos con los prompts, evalúa la estructura de las respuestas y guarda un registro JSON. |
+| `docs/resultados/` | Directorio utilizado por el script de comparación para guardar informes y registros. |
+| `docs/respuestas_completas.md` | Puede corresponder a un informe anterior; el script de comparación genera informes con nombres que incluyen la fecha/hora en `docs/resultados/`. |
+| `prompts/registro_resultados.json` | Registro que genera `prompts/test_consistencia.py`. |
+| `.env.example` | Plantilla con el nombre de la variable de la clave de Gemini. |
+| `.env` | Archivo local que debes crear para guardar tu clave; no debe publicarse. |
+| `.gitignore` | Reglas para excluir entornos virtuales, secretos y archivos temporales. |
+| `requirements.txt` | Lista de dependencias de Python, con versiones fijadas en la versión consultada. |
+| `.venv/` | Entorno virtual local recomendado por esta guía; se crea en tu equipo y no debe subirse a Git. |
 
-No es necesario que todas las carpetas de resultados existan antes de ejecutar el proyecto.
+**Importante:** los comandos de instalación y ejecución de esta guía se ejecutan desde la raíz `Proyecto_skillnest`, donde se encuentran `app.py` y `requirements.txt`.
 
----
+## 5. Configurar Python y el entorno virtual
 
-## 4. Crear el entorno virtual
+Un entorno virtual mantiene las dependencias de este proyecto separadas de las de otros proyectos de Python. Esta guía utiliza siempre el nombre `.venv`.
 
-Un entorno virtual mantiene las dependencias de este proyecto separadas de las de otros proyectos de Python.
+### 5.1. Crear el entorno
 
-En esta guía utilizaremos siempre una carpeta llamada **`.venv`** para evitar confusiones entre los distintos sistemas y VS Code.
+Puedes crear el entorno con VS Code o desde la terminal. Si `.venv` ya existe y funciona, no necesitas volver a crearlo.
 
-Debes crear el entorno una sola vez. Cuando abras una terminal nueva, normalmente tendrás que activarlo de nuevo.
+**Alternativa A — VS Code**
 
-### Camino A — Crear el entorno desde VS Code
+1. Abre la carpeta raíz `Proyecto_skillnest`.
+2. Instala la extensión **Python** publicada por Microsoft si aún no está instalada.
+3. Abre la paleta de comandos (`Ctrl + Shift + P` en Windows/Linux o `Cmd + Shift + P` en macOS).
+4. Selecciona `Python: Create Environment`.
+5. Elige `Venv` y selecciona una instalación compatible de Python.
+6. Espera a que VS Code cree el entorno. Comprueba la ubicación mostrada; normalmente será `.venv`.
+7. Si la opción no aparece o falla, sigue las instrucciones de terminal que aparecen a continuación.
 
-**Paso 1. Instala la extensión de Python.**
+**Alternativa B — terminal**
 
-1. En la barra izquierda de VS Code, haz clic en el icono de **Extensiones**. Parece un conjunto de cuadrados.
-2. Escribe `Python` en el buscador.
-3. Busca la extensión **Python**, publicada por Microsoft.
-4. Haz clic en **Instalar** y espera a que termine.
+Ejecuta los comandos desde la raíz del repositorio.
 
-**Paso 2. Abre la paleta de comandos.**
-
-Presiona `Ctrl + Shift + P` en Windows/Linux o `Cmd + Shift + P` en macOS.
-
-**Paso 3. Busca la opción para crear el entorno.**
-
-Escribe:
-
-```text
-Python: Create Environment
-```
-
-Selecciona esa opción en los resultados.
-
-**Paso 4. Elige el tipo de entorno.**
-
-Selecciona `Venv`.
-
-**Paso 5. Selecciona el intérprete de Python.**
-
-VS Code mostrará las versiones de Python que detecta en tu equipo. Selecciona una versión instalada y compatible.
-
-Espera mientras VS Code crea el entorno virtual. Puede tardar unos momentos.
-
-**Paso 6. Comprueba la terminal.**
-
-En el menú superior, selecciona **Terminal → Nueva terminal**.
-
-Normalmente, VS Code detectará el entorno y lo activará automáticamente. Deberías ver algo parecido a:
-
-```text
-(.venv)
-```
-
-al comienzo de la línea de comandos.
-
-Para comprobar la versión de Python, ejecuta el comando que corresponda a tu terminal:
-
-**Windows — PowerShell o CMD**
-
-```powershell
-python --version
-```
-
-Si `python` no funciona, prueba `py --version` en una terminal compatible.
-
-**macOS, Linux o WSL**
-
-```bash
-python --version
-```
-
-Si no funciona, prueba:
-
-```bash
-python3 --version
-```
-
-**¿No aparece `Python: Create Environment`?**
-
-- Comprueba que la extensión Python de Microsoft esté instalada.
-- Verifica que hayas abierto la carpeta del proyecto.
-- Comprueba que Python esté instalado.
-- Si VS Code no detecta ningún intérprete, reinícialo después de instalar Python.
-- Si no consigues crear el entorno desde VS Code, utiliza el Camino B.
-
-**Importante:** si VS Code crea una carpeta llamada `venv` en lugar de `.venv`, puedes continuar usando esa carpeta, pero debes mantener el mismo nombre en todos los comandos posteriores. Esta guía utiliza `.venv`.
-
-### Camino B — Crear el entorno desde la terminal
-
-Primero, confirma que estás en la raíz del proyecto, donde se encuentra `requirements.txt`.
-
-**Windows — PowerShell**
-
-```powershell
-Get-Location
-```
-
-**Windows — CMD**
-
-```cmd
-cd
-```
-
-**macOS, Linux o WSL**
-
-```bash
-pwd
-```
-
-La ruta debe terminar en `Proyecto_skillnest`. Si no es así, entra en la carpeta correcta utilizando `cd` seguido de su ruta.
-
-Ahora crea el entorno.
-
-**Windows — PowerShell**
+**Windows — PowerShell o CMD:**
 
 ```powershell
 python -m venv .venv
 ```
 
-Si no se reconoce `python`:
+Si `python` no está disponible en Windows, prueba este comando:
 
 ```powershell
 py -m venv .venv
 ```
 
-**Windows — CMD**
-
-```cmd
-python -m venv .venv
-```
-
-Si no se reconoce `python`:
-
-```cmd
-py -m venv .venv
-```
-
-**macOS, Linux o WSL**
+**macOS, Ubuntu, Linux y WSL:**
 
 ```bash
 python3 -m venv .venv
 ```
 
-El comando puede terminar sin mostrar ningún mensaje. Eso es normal: si no aparecen errores, comprueba que se haya creado la carpeta `.venv`.
+La creación puede terminar sin mostrar un mensaje. Comprueba que exista `.venv` con `Get-ChildItem` (PowerShell), `dir` (CMD) o `ls -la` (macOS/Linux/WSL).
 
-**Si Ubuntu muestra un error relacionado con `venv`:**
+Si Ubuntu/WSL indica que falta `venv`, vuelve a los requisitos previos e instala `python3-venv`.
 
-Instala el paquete necesario:
+### 5.2. Activar el entorno virtual
 
-```bash
-sudo apt update
-sudo apt install python3-venv python3-pip
-```
-
-Después, vuelve a ejecutar el comando de creación del entorno.
-
-### 4.1. Activar el entorno virtual
-
-Crear el entorno no es lo mismo que activarlo. Ejecuta el comando correspondiente a tu terminal.
-
-**Windows — PowerShell**
+**Windows — PowerShell:**
 
 ```powershell
 .\.venv\Scripts\Activate.ps1
 ```
 
-Si PowerShell bloquea el script, puedes permitir su ejecución solo en la sesión actual:
+Si PowerShell bloquea la ejecución del script, puedes permitirla temporalmente para el proceso actual:
 
 ```powershell
 Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass
 ```
 
-Después, vuelve a ejecutar el comando de activación.
+Después, vuelve a ejecutar el comando de activación. Este ajuste se aplica al proceso actual y no cambia permanentemente la política del sistema.
 
-Este ajuste solo afecta a la sesión actual de PowerShell. Si prefieres no modificar esa configuración temporal, puedes utilizar CMD.
-
-**Windows — CMD**
+**Windows — CMD:**
 
 ```cmd
 .venv\Scripts\activate.bat
 ```
 
-**macOS, Linux o WSL**
+**macOS, Ubuntu, Linux y WSL:**
 
 ```bash
 source .venv/bin/activate
 ```
 
-Si la activación funciona, normalmente aparecerá `(.venv)` al comienzo de la línea de comandos.
+La señal visual habitual de activación es `(.venv)` al principio del prompt, aunque la apariencia puede variar.
 
-Para comprobar que el entorno existe, puedes listar los archivos de la carpeta del proyecto:
+### 5.3. Verificar el intérprete activo
 
-- PowerShell: `Get-ChildItem`
-- CMD: `dir`
-- macOS, Linux o WSL: `ls -la`
+Con el entorno activado, comprueba qué Python se está utilizando.
 
-Si `.venv` no aparece, vuelve a crear el entorno desde la raíz correcta.
+**PowerShell:**
 
-### 4.2. Salir del entorno virtual
+```powershell
+Get-Command python
+```
 
-Cuando termines de trabajar, puedes desactivarlo con:
+**CMD:**
+
+```cmd
+where python
+```
+
+**macOS, Linux y WSL:**
+
+```bash
+which python
+```
+
+La ruta debería apuntar al entorno `.venv`. Si no es así, revisa la activación y, si usas VS Code, la selección del intérprete.
+
+### 5.4. Salir del entorno virtual
+
+Cuando termines, puedes desactivarlo con:
 
 ```bash
 deactivate
 ```
 
-El comando funciona en las terminales habituales donde el entorno está activado.
+Al abrir una terminal nueva normalmente tendrás que volver a activarlo. No necesitas crearlo otra vez si `.venv` sigue existiendo.
 
-La próxima vez que abras una terminal, vuelve a activar el entorno. No necesitas crearlo otra vez si la carpeta `.venv` sigue existiendo.
+## 6. Instalar las dependencias
 
----
-
-## 5. Instalar las dependencias
-
-Las dependencias son las bibliotecas que necesita el proyecto para funcionar. Están enumeradas en `requirements.txt`.
-
-Antes de instalarlas:
-
-1. Comprueba que estás en la raíz del repositorio.
-2. Activa el entorno virtual.
-3. Verifica que `requirements.txt` exista.
-
-Es preferible utilizar `python -m pip` o `python3 -m pip` para instalar los paquetes en el entorno de Python correcto.
-
-**Windows — PowerShell o CMD**
-
-Si `python` funciona:
-
-```powershell
-python -m pip install --upgrade pip
-python -m pip install -r requirements.txt
-```
-
-Si necesitas utilizar el lanzador `py`:
-
-```powershell
-py -m pip install --upgrade pip
-py -m pip install -r requirements.txt
-```
-
-**macOS, Linux o WSL**
-
-Si `python` funciona dentro del entorno activado:
+Ejecuta estos comandos desde la raíz del repositorio y con `.venv` activado:
 
 ```bash
 python -m pip install --upgrade pip
 python -m pip install -r requirements.txt
 ```
 
-Si necesitas utilizar `python3`:
+`python -m pip` utiliza `pip` asociado al intérprete `python` activo, lo que ayuda a evitar instalaciones en otro entorno.
+
+El `requirements.txt` de la versión consultada incluye, entre otras, `google-genai`, `requests`, `python-dotenv` y `pydantic`, con versiones fijadas en el archivo. La lista completa y sus versiones deben consultarse directamente en `requirements.txt`.
+
+Comprueba la versión de Python y de `pip`:
 
 ```bash
-python3 -m pip install --upgrade pip
-python3 -m pip install -r requirements.txt
-```
-
-Espera a que termine la instalación. Puede aparecer bastante texto en la terminal; eso es normal.
-
-Para comprobar que pip está disponible, ejecuta:
-
-```bash
+python --version
 python -m pip --version
 ```
 
-En macOS o Linux, si utilizas `python3`, puedes ejecutar:
+La ruta que muestre `pip` debe ser coherente con el entorno virtual. La instalación se considera completada cuando el comando termina sin errores; revisa el mensaje final en la terminal.
 
-```bash
-python3 -m pip --version
-```
+Si `python` no se encuentra en macOS/Linux/WSL, comprueba primero que `.venv` esté activado. Si todavía no creaste el entorno, sigue la sección 5 y utiliza `python3` para crearlo antes de activarlo.
 
-Si aparece un error de archivo no encontrado para `requirements.txt`, vuelve a comprobar tu ubicación. Si aparece un error durante la instalación de una dependencia, revisa el mensaje concreto antes de continuar.
+Si falla `pip install -r requirements.txt`, comprueba que:
 
----
+- Estás en la raíz correcta y existe `requirements.txt`.
+- El entorno virtual está activado.
+- Tienes conexión a Internet.
+- Tu versión de Python es compatible con las dependencias.
+- El mensaje de error no identifica una dependencia concreta o un problema de instalación que requiera atención.
 
-## 6. Configurar las variables de entorno
+No instales paquetes al azar ni modifiques `requirements.txt` sin revisar el error.
 
-Los scripts que consultan Gemini necesitan una clave de API. La guardaremos en un archivo llamado `.env`, separado del código fuente.
+## 7. Configurar la API de Gemini y `.env`
 
-**Importante:** `.env.example` es una plantilla. No contiene tu clave personal. Debes crear una copia llamada `.env` y editarla.
+Los scripts que consultan Gemini leen la variable `GEMINI_API_KEY`. El código de `src/consumir_gemini.py` y del script de costos/latencia comprueba que la variable exista. El archivo `.env.example` de la versión consultada contiene una plantilla para esa variable.
 
-### 6.1. Crear el archivo `.env`
+### 7.1. Comprobar y crear `.env`
 
-Primero, comprueba que `.env.example` exista en la raíz del repositorio.
+Ejecuta estos comandos desde la raíz del repositorio.
 
-**Windows — PowerShell**
+**PowerShell:**
 
 ```powershell
 Test-Path .env.example
+Test-Path .env
 ```
 
-Si devuelve `True`, puedes crear la copia:
+**CMD:**
+
+```cmd
+dir .env.example
+dir .env
+```
+
+**macOS, Linux y WSL:**
+
+```bash
+ls -l .env.example
+ls -la .env
+```
+
+Si `.env.example` existe y `.env` **no** existe, crea la copia con el comando correspondiente:
+
+**PowerShell:**
 
 ```powershell
 Copy-Item .env.example .env
 ```
 
-**Windows — CMD**
+**CMD:**
 
 ```cmd
-dir .env.example
 copy .env.example .env
 ```
 
-**macOS, Linux o WSL**
+**macOS, Linux y WSL:**
 
 ```bash
-ls -l .env.example
 cp .env.example .env
 ```
 
-Estos comandos crean `.env` en la carpeta actual.
+Ejecuta el comando de copia solo cuando se cumplan esas condiciones. Si `.env` ya existe, edita el archivo existente en lugar de sobrescribirlo. Si falta `.env.example`, confirma que estás en la raíz y revisa los archivos de tu versión del repositorio.
 
-**Si `.env` ya existe:** no lo sobrescribas automáticamente, porque podrías perder una clave que ya hayas configurado. Abre el archivo existente y edítalo.
+### 7.2. Editar `.env`
 
-Si `.env.example` no existe, comprueba que estés en la raíz del proyecto y revisa el contenido real del repositorio antes de continuar.
+Abre `.env` desde VS Code o utiliza un editor disponible en tu sistema. Ejecuta los comandos desde la raíz del proyecto.
 
-### 6.2. Abrir y editar `.env`
+- **Windows — PowerShell o CMD:**
 
-Puedes editar el archivo desde VS Code o mediante un editor de texto.
+  ```powershell
+  notepad .env
+  ```
 
-**Opción A — VS Code**
+- **macOS:**
 
-1. En el panel izquierdo, busca el archivo `.env`.
-2. Haz clic en él para abrirlo.
-3. Edita la línea correspondiente a la clave.
-4. Guarda con `Ctrl + S` en Windows/Linux o `Cmd + S` en macOS.
+  ```bash
+  open -e .env
+  ```
 
-Si el archivo no aparece, revisa que lo hayas creado correctamente. Algunos archivos que empiezan por punto pueden no ser visibles en ciertos paneles o exploradores.
+- **Linux/Ubuntu/WSL**, si `nano` está instalado:
 
-**Opción B — Windows PowerShell**
+  ```bash
+  nano .env
+  ```
 
-```powershell
-notepad .env
-```
+En `nano`, guarda con `Ctrl + O`, confirma con Enter y sal con `Ctrl + X`.
 
-**Opción C — Windows CMD**
+La variable que espera el código es:
 
-```cmd
-notepad .env
-```
-
-Se abrirá el Bloc de notas. Si Windows pregunta si deseas crear un archivo nuevo, cancela y verifica primero que `.env` exista.
-
-**Opción D — macOS**
-
-```bash
-open -e .env
-```
-
-Este comando intenta abrir el archivo con TextEdit.
-
-**Opción E — Linux o Ubuntu**
-
-Si tienes instalado `nano`:
-
-```bash
-nano .env
-```
-
-Para guardar en `nano`, presiona `Ctrl + O`, confirma con Enter y sal con `Ctrl + X`.
-
-### 6.3. Agregar la clave de Gemini
-
-Obtén tu clave desde el servicio oficial:
-
-[https://aistudio.google.com/apikey](https://aistudio.google.com/apikey)
-
-En el archivo `.env`, configura la variable con el nombre exacto esperado por el proyecto:
-
-```dotenv
+```ini
 GEMINI_API_KEY=TU_CLAVE_REAL
 ```
 
-Reemplaza `TU_CLAVE_REAL` por tu clave personal. Esa expresión es un ejemplo, no una clave válida.
+Reemplaza `TU_CLAVE_REAL` por tu clave auténtica. Es solo un marcador de ejemplo, no una clave válida. No cambies el nombre `GEMINI_API_KEY`, ya que el código consulta exactamente esa variable.
 
-No agregues la clave al código Python, no la publiques en GitHub y no la compartas en capturas de pantalla o mensajes.
+### 7.3. Obtener y proteger la clave
 
-Guarda el archivo después de editarlo.
+Puedes gestionar la clave desde [Google AI Studio — API keys](https://aistudio.google.com/apikey).
 
-### 6.4. Comprobar que `.env` existe
+La clave es un secreto: no la incluyas en el README, el código, commits, capturas de pantalla ni mensajes de error públicos. Si una clave real se publica o comparte por accidente, revócala o rótala desde el proveedor. Borrarla en un commit posterior no garantiza que deje de estar expuesta.
 
-**Windows — PowerShell**
+### 7.4. Comprobar que Git ignora `.env`
 
-```powershell
-Test-Path .env
-```
-
-El resultado esperado es:
-
-```text
-True
-```
-
-**Windows — CMD**
-
-```cmd
-dir .env
-```
-
-**macOS, Linux o WSL**
-
-```bash
-ls -la .env
-```
-
-Estos comandos permiten comprobar que el archivo existe. No demuestran por sí solos que la clave sea válida ni que el programa esté leyendo correctamente las variables de entorno.
-
-### 6.5. Comprobar que Git ignora `.env`
-
-Ejecuta el siguiente comando desde la raíz del repositorio. Funciona en PowerShell, CMD, macOS, Linux y WSL:
+El `.gitignore` consultado ya incluye reglas para `.env`, `.venv/`, `venv/`, `env/`, cachés de Python y archivos de sistema/editor. Comprueba la regla efectiva desde la raíz:
 
 ```bash
 git check-ignore -v .env
 ```
 
-Si Git muestra una regla de `.gitignore`, el archivo está siendo ignorado por esa regla.
+Si Git muestra una regla, podrás identificar el archivo y la línea que ignoran `.env`. Si no muestra salida, revisa `.gitignore` y el estado de seguimiento del archivo.
 
-Si no aparece ninguna salida, revisa `.gitignore` y confirma que incluya, como mínimo:
+Como mínimo, las reglas relevantes deberían incluir:
 
 ```gitignore
 .env
@@ -757,151 +502,77 @@ venv/
 __pycache__/
 ```
 
-Si `.env` ya estaba versionado anteriormente, agregarlo a `.gitignore` no lo elimina del historial ni deja de versionarlo automáticamente. En ese caso, comprueba el estado del repositorio antes de publicar cambios.
+No reemplaces el `.gitignore` existente sin revisarlo: conserva sus otras reglas útiles y añade solo las que falten.
 
-**Nunca subas una clave de API a GitHub.** Si una clave real se publicó o compartió por error, revócala y genera una nueva.
+**Importante:** `.gitignore` no deja de seguir automáticamente un archivo que ya se había agregado a Git. Si `.env` ya está versionado, comprueba su estado antes de corregir el seguimiento y evita publicar cambios mientras contenga secretos. Si la clave ya se publicó, rótala.
 
----
+## 8. Ejecutar la aplicación y los scripts
 
-## 7. Ejecutar los scripts
+Ejecuta los comandos desde la raíz `Proyecto_skillnest`, con el entorno virtual activado y las dependencias instaladas. Los comandos siguientes usan `python`, que debería apuntar a `.venv` cuando está activado correctamente.
 
-Antes de ejecutar un script, comprueba lo siguiente:
+No es obligatorio ejecutar todos los scripts: elige el que corresponda a la tarea que quieras realizar.
 
-- Estás en la raíz del repositorio.
-- El entorno virtual está activado.
-- Las dependencias se instalaron correctamente.
-- El archivo `.env` existe y contiene la variable necesaria.
-- Tu clave de API es válida y tienes acceso al modelo configurado.
-
-Los comandos de esta sección se ejecutan desde la raíz del proyecto, no desde dentro de `src` o `prompts`.
-
-### 7.1. Aplicación principal: `app.py`
-
-**Windows — PowerShell o CMD**
-
-```powershell
-python app.py
-```
-
-Si necesitas usar el lanzador de Windows:
-
-```powershell
-py app.py
-```
-
-**macOS, Linux o WSL**
+### 8.1. Aplicación principal
 
 ```bash
 python app.py
 ```
 
-Si necesitas utilizar `python3`:
+El código consultado carga `.env`, crea un cliente de Gemini y solicita una respuesta al modelo configurado en el archivo. Imprime una estructura de salida definida por el propio script. Necesitarás una clave válida y conectividad con el servicio.
 
-```bash
-python3 app.py
-```
-
-La salida exacta depende de la implementación de `app.py`. Si el archivo ejecuta una consulta a Gemini, necesitará que la configuración de la API sea correcta.
-
-No se debe asumir que muestra una interfaz gráfica, que repite solicitudes o que guarda resultados, salvo que eso esté implementado en el código.
-
-### 7.2. Consulta individual a Gemini
-
-Archivo: `src/consumir_gemini.py`.
-
-**Windows — PowerShell o CMD**
-
-```powershell
-python src/consumir_gemini.py
-```
-
-**macOS, Linux o WSL**
+### 8.2. Solicitud a Gemini desde `src/consumir_gemini.py`
 
 ```bash
 python src/consumir_gemini.py
 ```
 
-Si utilizas el lanzador `py` en Windows o `python3` en macOS/Linux, sustituye el nombre del ejecutable según corresponda.
+El archivo contiene funciones para preparar la solicitud, enviarla al servicio y extraer el texto de la respuesta. Revisa el código de la versión que tienes para conocer su flujo de ejecución completo. La función que arma la petición requiere `GEMINI_API_KEY`.
 
-Este script realiza una petición a Gemini y calcula un costo estimado a partir de los datos de uso disponibles en la respuesta. La salida concreta depende de la respuesta de la API y de las tarifas configuradas en el código.
+### 8.3. Comparar modelos, latencia y costo
 
-Si aparece un error, conserva el mensaje completo para poder identificar si se trata de un problema de credenciales, conexión, cuota, modelo o respuesta del servicio.
-
-### 7.3. Comparativa de modelos, latencia y costo
-
-Archivo: `src/consumir_gemini costos_latencia.py`.
-
-El nombre contiene espacios, por lo que debes mantener las comillas alrededor de la ruta.
-
-**Windows — PowerShell o CMD**
-
-```powershell
-python "src/consumir_gemini costos_latencia.py"
-```
-
-**macOS, Linux o WSL**
+El nombre del archivo contiene un espacio; conserva las comillas:
 
 ```bash
 python "src/consumir_gemini costos_latencia.py"
 ```
 
-La comparativa utiliza los modelos configurados en el script. Puede tardar más que una petición individual si realiza varias solicitudes o reintenta operaciones.
+El script consultado ejecuta preguntas de prueba contra varios modelos configurados, mide latencia y estima costos usando tarifas definidas en el propio código. Realiza varias solicitudes, por lo que puede tardar y consumir cuota de la API.
 
-Los archivos de salida dependen de la versión actual del script. Revisa los mensajes de la terminal y las rutas configuradas en el código para saber dónde se guardaron los resultados.
-
-Los costos son estimaciones basadas en las tarifas configuradas. Antes de interpretar las cifras, comprueba que los modelos y los precios correspondan a la API utilizada.
-
-### 7.4. Prueba de consistencia de prompts
-
-Archivo: `prompts/test_consistencia.py`.
-
-**Windows — PowerShell o CMD**
-
-```powershell
-python prompts/test_consistencia.py
-```
-
-**macOS, Linux o WSL**
+### 8.4. Prueba de consistencia de prompts
 
 ```bash
 python prompts/test_consistencia.py
 ```
 
-La salida depende de los prompts configurados, de las respuestas del modelo y de la disponibilidad de la API. Si falla una solicitud, revisa el error devuelto antes de concluir que el código está defectuoso.
+El script utiliza `prompts/banco.py`, realiza hasta tres intentos por prompt, clasifica los resultados y guarda un registro JSON en `prompts/registro_resultados.json`. Puede necesitar la clave de Gemini y conexión al servicio. No equivale necesariamente a una prueba automatizada de todo el proyecto.
 
----
+## 9. Resultados y archivos generados
 
-## 8. Resultados y archivos generados
+Distingue entre los archivos incluidos en el repositorio y los que se crean al ejecutar los scripts.
 
-Los resultados dependen de los scripts que ejecutes y de cómo esté configurada la versión actual del proyecto.
+- **`prompts/registro_resultados.json`:** el script `prompts/test_consistencia.py` escribe aquí el registro de la ejecución. Si ya existe, la ejecución lo vuelve a escribir; revisa o conserva una copia si necesitas mantener el historial anterior.
+- **`docs/resultados/`:** el script `src/consumir_gemini costos_latencia.py` crea el directorio si hace falta.
+- **`docs/resultados/respuestas_<identificador>.md`:** el script de costos/latencia crea un informe Markdown con un identificador de ejecución basado en la fecha y hora.
+- **`docs/resultados/registro_ejecuciones.jsonl`:** el mismo script agrega registros de cada solicitud en formato JSON Lines.
+- **`docs/respuestas_completas.md`:** puede ser un informe de referencia existente. El script de comparación consultado escribe informes nuevos en `docs/resultados/`, no en esta ruta fija.
 
-Entre los archivos y directorios de referencia pueden encontrarse:
+Los resultados concretos dependen de las solicitudes que terminen correctamente. Para verificar una ejecución, revisa el mensaje de la terminal, el código de salida del proceso y las rutas que el script informe. Si un programa termina sin imprimir lo esperado, consulta su código antes de asumir que hubo un error.
 
-- `docs/respuestas_completas.md`: informe de comparación, si está incluido o se genera en la ejecución.
-- `docs/resultados/`: carpeta destinada a resultados.
-- `prompts/registro_resultados.json`: registro de pruebas de consistencia, si el script lo utiliza.
+Los costos son estimaciones: dependen de las tarifas configuradas, el modelo solicitado y el consumo informado por la API. Las tarifas pueden cambiar; no interpretes los valores del código como precios universales ni como un importe definitivo de facturación.
 
-No asumas que todos estos archivos se crearán automáticamente. Comprueba los mensajes que aparecen en la terminal y las rutas de salida definidas en el script correspondiente.
+## 10. Uso básico de Git
 
-Si necesitas conservar la trazabilidad de las pruebas, no elimines los informes históricos ni los registros acumulados sin revisar primero su contenido.
+Ejecuta estos comandos desde la raíz del repositorio. Son comunes a PowerShell, CMD, macOS, Linux y WSL.
 
----
-
-## 9. Uso básico de Git
-
-Esta sección es opcional si solo quieres ejecutar el proyecto. Git también permite guardar y publicar cambios en el repositorio.
-
-Los comandos siguientes se pueden utilizar en PowerShell, CMD, macOS, Linux y WSL, siempre que estés dentro de la carpeta del repositorio.
-
-### 9.1. Revisar el estado
+### 10.1. Consultar el estado
 
 ```bash
 git status
 ```
 
-Muestra los archivos modificados, los archivos nuevos y los cambios preparados para un commit.
+Muestra la rama actual y los archivos modificados, nuevos o preparados para un commit.
 
-### 9.2. Consultar el historial
+### 10.2. Consultar el historial
 
 ```bash
 git log --oneline
@@ -909,156 +580,170 @@ git log --oneline
 
 Muestra un resumen de los commits anteriores.
 
-### 9.3. Preparar un archivo específico
+### 10.3. Revisar cambios sin preparar
 
-Por ejemplo, para preparar solo el README:
+```bash
+git diff
+```
+
+Muestra los cambios que todavía no están preparados para el próximo commit.
+
+### 10.4. Preparar un archivo concreto
 
 ```bash
 git add README.md
 ```
 
-### 9.4. Revisar los cambios preparados
+Este ejemplo prepara únicamente `README.md`. Revisa `git status` antes de agregar archivos y no prepares `.env`, claves, entornos virtuales ni resultados sensibles.
+
+### 10.5. Revisar los cambios preparados
 
 ```bash
 git diff --cached
 ```
 
-Este comando permite revisar qué cambios se incluirán en el próximo commit.
+Revisa aquí el contenido exacto que entrará en el próximo commit.
 
-### 9.5. Crear un commit
+### 10.6. Crear un commit
 
 ```bash
-git commit -m "Actualiza documentación"
+git commit -m "readme: actualizar guia de instalacion y uso"
 ```
 
-Un commit registra los cambios que preparaste localmente.
+Hazlo después de revisar los cambios preparados. Si Git solicita identidad, configura tu nombre y correo con los datos que quieras asociar a tus commits.
 
-### 9.6. Publicar los cambios
+### 10.7. Enviar cambios al repositorio remoto
 
 ```bash
 git push origin main
 ```
 
-Este comando intenta subir los commits locales a la rama `main` del repositorio remoto. Necesitarás los permisos y la autenticación correspondientes.
+Este comando supone que el remoto se llama `origin`, que la rama se llama `main` y que tienes permisos. Comprueba `git status` y utiliza la rama correcta si tiene otro nombre.
 
-Si el repositorio utiliza otra rama, comprueba primero el nombre con `git status`.
-
-### 9.7. Descargar cambios remotos
+### 10.8. Actualizar la copia local
 
 ```bash
 git pull
 ```
 
-Descarga e integra los cambios de la rama remota configurada.
+Antes de actualizar, comprueba la rama actual y el estado de los cambios locales para evitar conflictos o sobrescrituras no deseadas.
 
-**Importante:** antes de ejecutar `git add .`, revisa `git status`. No prepares ni publiques `.env`, claves de API, archivos sensibles o la carpeta `.venv`.
+No ejecutes `git add .` automáticamente. Revisa primero `git status` y selecciona de forma explícita los archivos que quieres publicar.
 
----
-
-## 10. Solución de problemas
+## 11. Solución de problemas frecuentes
 
 ### Python no se reconoce
 
-- Windows: prueba `py --version`.
-- macOS, Linux o WSL: prueba `python3 --version`.
-- Si Python está instalado pero no se encuentra, cierra y vuelve a abrir la terminal.
-- En WSL, recuerda que Python debe estar disponible dentro del entorno Linux.
+1. Comprueba `python --version`; en Windows prueba `py --version` y en macOS/Linux/WSL prueba `python3 --version`.
+2. Si no hay una versión disponible, instala Python.
+3. Si está instalado, revisa `PATH` y vuelve a abrir la terminal.
+4. Si ya creaste `.venv`, actívalo antes de ejecutar los comandos del proyecto.
 
 ### Git no se reconoce
 
-Comprueba que Git esté instalado y vuelve a abrir la terminal. Si el problema persiste, revisa la instalación desde [git-scm.com/downloads](https://git-scm.com/downloads).
+Ejecuta `git --version`. Si falla, instala Git según la sección 2.2 y vuelve a abrir la terminal.
+
+### `fatal: not a git repository`
+
+La terminal probablemente está fuera del repositorio. Comprueba la ubicación con `pwd` (PowerShell/macOS/Linux/WSL) o `cd` (CMD), lista los archivos y entra en la carpeta que contiene `.git` y `README.md`. Después, vuelve a ejecutar `git status`.
 
 ### No se encuentra `requirements.txt`
 
-Probablemente estás en una carpeta incorrecta.
+Comprueba que estás en la raíz `Proyecto_skillnest`. Lista los archivos con `Get-ChildItem` (PowerShell), `dir` (CMD) o `ls -la` (macOS/Linux/WSL). No crees un archivo vacío ni reinstales Python como primera solución.
 
-- PowerShell: ejecuta `Get-ChildItem`.
-- CMD: ejecuta `dir`.
-- macOS, Linux o WSL: ejecuta `ls -la`.
+### No se puede activar el entorno virtual
 
-Entra en la carpeta `Proyecto_skillnest` y vuelve a intentarlo.
-
-### No se encuentra el comando de activación
-
-Comprueba que el entorno se haya creado y que estés utilizando el comando correspondiente a tu sistema:
-
-- PowerShell: `.\.venv\Scripts\Activate.ps1`
-- CMD: `.venv\Scripts\activate.bat`
-- macOS, Linux o WSL: `source .venv/bin/activate`
-
-Si creaste el entorno con otro nombre, utiliza ese nombre en la ruta.
-
-### PowerShell bloquea la activación
-
-Puedes permitir la ejecución del script solo durante la sesión actual:
-
-```powershell
-Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass
-```
-
-Después, vuelve a ejecutar el comando de activación. Como alternativa, utiliza CMD y ejecuta `.venv\Scripts\activate.bat`.
+Comprueba que `.venv` existe y que se creó desde la raíz correcta. Usa el comando de activación de la sección 5.2 para tu terminal. Si PowerShell bloquea el script, aplica la alternativa temporal de la sección 5.2 y vuelve a intentar la activación.
 
 ### No se encuentra `GEMINI_API_KEY`
 
-1. Comprueba que `.env` exista en la raíz del proyecto.
-2. Abre el archivo y confirma que la variable se llama exactamente `GEMINI_API_KEY`.
-3. Comprueba que hayas guardado el archivo.
-4. Verifica que la clave sea válida y tenga los permisos necesarios.
-5. Confirma que el código del script cargue o lea correctamente las variables de entorno.
+1. Comprueba que `.env` existe en la raíz.
+2. Confirma que la variable se llama exactamente `GEMINI_API_KEY`.
+3. Guarda los cambios del archivo.
+4. Revisa que el script cargue las variables de entorno; los scripts consultados utilizan `load_dotenv()`.
+5. Comprueba la validez y los permisos de la clave sin imprimirla ni compartirla.
 
-No publiques el contenido del archivo para solicitar ayuda.
+### Error 401 o 403 de Gemini
 
-### La API devuelve un error 401 o 403
+Puede estar relacionado con credenciales, permisos, acceso al modelo o configuración del servicio. Revisa el mensaje completo de la API, la clave y los permisos aplicables; el código de estado por sí solo no siempre determina una causa única.
 
-Puede existir un problema con la clave, los permisos, el acceso al modelo o la configuración del servicio. Comprueba las credenciales y los permisos de tu cuenta.
+### Error 429
 
-### La API devuelve un error 429
+Puede indicar límites de solicitudes, cuota o frecuencia de uso. Revisa la cuota y las condiciones vigentes del proveedor. Evita reintentar de forma agresiva; algunos scripts incorporan pausas o reintentos.
 
-Puede indicar que alcanzaste un límite de solicitudes o cuota. Revisa los límites de tu cuenta y espera antes de volver a intentarlo.
+### Error 503
 
-### La API devuelve un error 503
+Puede indicar indisponibilidad o saturación temporal del servicio. Consulta el estado del servicio y, si corresponde, vuelve a intentarlo prudentemente. El comportamiento depende del script: algunos reintentan ciertas solicitudes y otros devuelven un error.
 
-El servicio puede estar temporalmente saturado. El comportamiento ante este error depende del script: algunos pueden reintentar solicitudes y otros devolverán un error directamente.
+### No aparecen resultados
 
-### El costo parece incorrecto
+Confirma que ejecutaste el script correcto desde la raíz. Revisa si imprime información por consola o guarda archivos, el mensaje de error, el código de salida y las rutas de salida descritas en la sección 9. Un script que no imprime una respuesta no necesariamente ha fallado; verifica su comportamiento en el código.
 
-Verifica las tarifas configuradas en el código, el modelo utilizado y los datos de uso devueltos por la API. El costo calculado puede no coincidir con una factura si las tarifas, los tipos de tokens o las condiciones del servicio son diferentes.
+### Los costos o la latencia son diferentes
 
-### El comando termina sin mostrar resultados
+Pueden variar según el modelo solicitado y el modelo que responda, las entradas, la cantidad de solicitudes, el tiempo de respuesta, los reintentos, el uso de tokens y las tarifas vigentes. Comprueba los valores configurados en el script antes de comparar resultados.
 
-Comprueba el código del script para identificar qué debería imprimir o guardar. No todos los scripts generan informes ni muestran una respuesta en pantalla.
+## 12. Buenas prácticas
 
----
+- Usa un entorno virtual por proyecto y actívalo antes de instalar o ejecutar dependencias.
+- Ejecuta los comandos desde la raíz del repositorio, salvo que una instrucción indique otra ruta.
+- Mantén la clave fuera del código y del control de versiones; no compartas `.env`.
+- Revisa `git status` antes de preparar cambios y `git diff --cached` antes de crear un commit.
+- No publiques `.venv/`, cachés, archivos temporales ni datos sensibles.
+- Utiliza `requirements.txt` como referencia de las dependencias instaladas.
+- Conserva los registros que necesites para comparar ejecuciones antes de volver a generarlos.
+- Comprueba los errores y el código real antes de aplicar soluciones o afirmar que una ejecución produjo un resultado.
+- Revisa las tarifas y los modelos configurados antes de interpretar las estimaciones de costos.
 
-## 11. Buenas prácticas
+## 13. Resumen de instalación y ejecución
 
-- No escribas claves de API directamente en el código fuente.
-- No publiques `.env` ni compartas su contenido.
-- Mantén `.env` y `.venv/` excluidos de Git.
-- Activa el entorno virtual antes de ejecutar los scripts.
-- Mantén `requirements.txt` actualizado cuando cambien las dependencias.
-- Revisa los resultados antes de sobrescribir o eliminar informes históricos.
-- Verifica los modelos y las tarifas configuradas antes de interpretar las métricas.
-- Revisa `git status` antes de preparar y publicar cambios.
-- Si compartes un error para recibir ayuda, elimina las claves, tokens y demás datos sensibles del mensaje.
+Si ya tienes el repositorio clonado, abre una terminal en la carpeta raíz `Proyecto_skillnest`. Si `.venv` ya existe, omite la creación del entorno.
 
----
+### Crear el entorno virtual
 
-## 12. Flujo de trabajo resumido
+**Windows — PowerShell o CMD:**
 
-Para preparar el proyecto desde cero:
+```powershell
+python -m venv .venv
+```
 
-1. Instala Python y Git.
-2. Descarga el repositorio mediante VS Code o la terminal.
-3. Entra en la carpeta `Proyecto_skillnest`.
-4. Crea el entorno virtual `.venv`.
-5. Activa el entorno virtual.
-6. Instala las dependencias desde `requirements.txt`.
-7. Crea el archivo `.env` a partir de `.env.example`.
-8. Abre `.env`, agrega tu clave de API de Gemini y guarda los cambios.
-9. Comprueba que Git ignore `.env`.
-10. Ejecuta el script que necesites.
-11. Revisa los mensajes de la terminal y los resultados generados.
-12. Si realizaste cambios en el proyecto, revisa el estado de Git antes de crear commits o publicarlos.
+Si `python` no se reconoce, prueba `py -m venv .venv`.
 
-**Recuerda:** puedes completar la configuración y ejecutar los scripts usando únicamente la terminal. VS Code es opcional.
+**macOS, Ubuntu, Linux o WSL:**
+
+```bash
+python3 -m venv .venv
+```
+
+### Activar el entorno virtual
+
+Usa solo el comando que corresponda a la terminal que abriste:
+
+- **PowerShell:** `.\.venv\Scripts\Activate.ps1`
+- **CMD:** `.venv\Scripts\activate.bat`
+- **macOS, Ubuntu, Linux o WSL:** `source .venv/bin/activate`
+
+### Instalar dependencias y ejecutar
+
+Con el entorno activado, estos comandos son iguales en PowerShell, CMD, macOS, Linux y WSL:
+
+```bash
+python -m pip install --upgrade pip
+python -m pip install -r requirements.txt
+```
+
+Configura `.env` según la sección 7 si vas a ejecutar scripts que necesitan Gemini. Para iniciar la aplicación principal:
+
+```bash
+python app.py
+```
+
+Consulta la sección 8 para los otros scripts y la sección 11 si aparece un error.
+
+## Referencias
+
+- [Repositorio Proyecto_skillnest en GitHub](https://github.com/Sadzc/Proyecto_skillnest)
+- [Descargas de Python](https://www.python.org/downloads/)
+- [Descargas de Git](https://git-scm.com/downloads)
+- [Descargas de Visual Studio Code](https://code.visualstudio.com/)
+- [Google AI Studio — API keys](https://aistudio.google.com/apikey)
