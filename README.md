@@ -107,57 +107,113 @@ Puedes instalar Visual Studio Code desde https://code.visualstudio.com/download.
 
 ## 2. Obtener el proyecto
 
-Puedes descargar y descomprimir el repositorio desde la plataforma del curso, o clonarlo desde GitHub. Para clonar, copia la URL real desde el botón **Code** del repositorio y ejecuta en cualquier terminal:
+La forma recomendada de obtener el proyecto es clonarlo desde GitHub. Así tendrás los archivos y el historial de versiones de Git.
+
+Abre una terminal y ejecuta:
 
 ```bash
-git clone URL_DEL_REPOSITORIO
-cd asistente_documentacion_data_warehouse
+git clone https://github.com/Sadzc/Proyecto_skillnest.git
+cd Proyecto_skillnest
 ```
 
-Reemplaza `URL_DEL_REPOSITORIO` por la URL real. Si descargaste un ZIP, abre una terminal dentro de la carpeta descomprimida y continúa desde allí.
+Si GitHub solicita autenticación, sigue las instrucciones que aparezcan en la terminal.
 
-Comprueba que estás en la raíz del proyecto (donde están `requirements.txt` y `README.md`):
+**Verificar que estás en la carpeta correcta**
+
+Ejecuta:
 
 ```bash
 git status
 ```
 
+Deberías ver el estado de la rama y no un error indicando que no existe un repositorio Git.
+
+Comprueba también que los archivos principales estén presentes:
+
+- `README.md`
+- `requirements.txt`
+- `.env.example`
+
+Si prefieres descargar el proyecto como ZIP desde GitHub, puedes hacerlo desde la opción **Code → Download ZIP**. Sin embargo, esa descarga no incluye el historial Git necesario para realizar todas las comprobaciones de esta guía. Para seguir el flujo completo, utiliza `git clone`.
+
 ## 3. Estructura del repositorio
 
+El proyecto está organizado en carpetas para separar el código, los prompts, las pruebas y la documentación.
+
+La siguiente estructura es orientativa; consulta los archivos reales del repositorio para identificar todos sus componentes.
+
 ```text
-plantilla-repositorio-base/
+Proyecto_skillnest/
+## 3. Estructura del repositorio
+
+El proyecto organiza el código, los prompts, las pruebas y la documentación en carpetas separadas.
+
+```text
 asistente_documentacion_data_warehouse/
+Proyecto_skillnest/
 ├── docs/
+│   ├── resultados/                  # Resultados generados durante las ejecuciones
 │   ├── decision-arquitectura.md
 │   ├── diagrama_arquitectura.png
 │   ├── evidencia_peticion_autenticada.png
-│   ├── respuestas_completas.md
-│   └── resultados/
-│       ├── respuestas_ID.md
-│       └── registro_ejecuciones.jsonl
+│   └── respuestas_completas.md
 ├── prompts/
+│   ├── banco.py
+│   ├── registro_resultados.json
+│   └── test_consistencia.py
 ├── src/
+│   ├── consumir_gemini.py
+│   └── consumir_gemini costos_latencia.py
 ├── tests/
 ├── .env.example
 ├── .gitignore
 ├── README.md
-├── requirements.txt
-└── app.py
+├── app.py
+└── requirements.txt
 ```
 
-- `src/`: scripts principales del proyecto.
-- `prompts/`: banco de prompts y archivos relacionados con pruebas y registro de resultados.
-- `tests/`: espacio para pruebas automatizadas.
-- `docs/`: documentación, diagramas, evidencias e informes.
-- `docs/respuestas_completas.md`: informe más reciente de la comparativa de modelos.
-- `docs/resultados/`: historial de informes por ejecución y registro estructurado acumulativo; se crea automáticamente.
-- `prompts/registro_resultados.json`: archivo existente del proyecto; su estructura y finalidad deben mantenerse según el código que lo utiliza.
-- `requirements.txt`: dependencias Python necesarias para reconstruir el entorno.
-- `.env`: variables privadas como la clave de API. No se versiona.
-- `.gitignore`: reglas para excluir archivos locales y sensibles.
-- `venv/`: entorno virtual local creado durante la instalación; no debe subirse a GitHub.
-- `__pycache__/`: caché generada por Python; no necesita versionarse.
-- `app.py`: archivo Python en la raíz; su función concreta depende de su implementación.
+**Función de los principales archivos y carpetas**
+
+- `src/`: contiene los scripts de consumo de Gemini y comparativa de modelos, costos y latencia.
+- `prompts/banco.py`: contiene el banco de prompts del proyecto.
+- `prompts/test_consistencia.py`: ejecuta las comprobaciones de consistencia de prompts.
+- `prompts/registro_resultados.json`: archivo de registro utilizado por el proyecto.
+- `tests/`: carpeta reservada para pruebas automatizadas.
+- `docs/`: contiene la documentación, el diagrama de arquitectura, la evidencia de autenticación y los informes.
+- `docs/decision-arquitectura.md`: documenta las decisiones de arquitectura.
+- `docs/diagrama_arquitectura.png`: contiene el diagrama de arquitectura.
+- `docs/evidencia_peticion_autenticada.png`: contiene evidencia de una petición autenticada.
+- `docs/respuestas_completas.md`: conserva el informe de referencia de la comparativa de modelos.
+- `.env.example`: plantilla de configuración sin credenciales reales.
+- `.gitignore`: define los archivos que Git debe excluir.
+- `.env`: archivo local con variables privadas, como la clave de API; no debe subirse al repositorio.
+- `venv/`: entorno virtual local que se crea durante la instalación y no debe subirse a GitHub.
+- `requirements.txt`: lista las dependencias Python necesarias para instalar el proyecto.
+- `app.py`: archivo Python ubicado en la raíz; su función depende de su implementación.
+
+Los archivos `.gitkeep` permiten conservar carpetas vacías en Git. Los informes adicionales y los registros generados durante las ejecuciones solo deben incluirse en esta estructura cuando existan y estén versionados en el repositorio.
+```
+
+**Función de los principales archivos y carpetas**
+
+- `src/`: contiene los scripts del proyecto.
+- `prompts/`: contiene el banco de prompts y los archivos relacionados con las pruebas de consistencia.
+- `tests/`: espacio destinado a las pruebas automatizadas.
+- `docs/`: contiene la documentación, los diagramas, las evidencias y los informes.
+- `docs/decision-arquitectura.md`: documenta las decisiones de arquitectura.
+- `docs/diagrama_arquitectura.png`: contiene el diagrama de arquitectura.
+- `docs/respuestas_completas.md`: conserva el informe de referencia de la comparativa de modelos.
+- `docs/resultados/`: almacena los informes individuales y el registro acumulativo generado por la comparativa, según la implementación del script.
+- `prompts/registro_resultados.json`: archivo de registro existente; su finalidad depende de cómo lo utiliza el código.
+- `requirements.txt`: lista las dependencias Python del proyecto.
+- `.env.example`: plantilla para configurar las variables de entorno, sin credenciales reales.
+- `.gitignore`: define los archivos que Git debe excluir.
+- `.env`: archivo local que contiene variables privadas, como la clave de API; no debe subirse al repositorio.
+- `venv/`: entorno virtual local que se crea durante la instalación y no debe subirse a GitHub.
+- `__pycache__/`: carpeta de caché generada por Python; no necesita versionarse.
+- `app.py`: archivo Python ubicado en la raíz del proyecto; su función depende de su implementación.
+
+**Nota:** la estructura anterior debe coincidir con los archivos que realmente existen en GitHub. Si algún archivo o carpeta no existe, elimínalo de este esquema. Los resultados nuevos de la comparativa se describen en la sección 8.
 
 ## 4. Crear y activar el entorno virtual
 
