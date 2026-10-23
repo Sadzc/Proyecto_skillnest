@@ -1,0 +1,99 @@
+{
+  "fecha_hora_local": "2026-10-23T15:25:44.928452-03:00",
+  "resultados": {
+    "clasificar_objeto": {
+      "intentos": 3,
+      "exitos": 2,
+      "fallos_formato": 0,
+      "errores_api": 1,
+      "detalle": [
+        {
+          "intento": 1,
+          "modelo_reportado": "gemini-3.6-flash",
+          "respuesta_original": "{\"categoria\":\"columna\",\"confianza\":0.99}",
+          "estado": "valida",
+          "datos": {
+            "categoria": "columna",
+            "confianza": 0.99
+          }
+        },
+        {
+          "intento": 2,
+          "estado": "error_api",
+          "error": "Error 503: This model is currently experiencing high demand. Spikes in demand are usually temporary. Please try again later."
+        },
+        {
+          "intento": 3,
+          "modelo_reportado": "gemini-3.6-flash",
+          "respuesta_original": "{\"categoria\":\"columna\",\"confianza\":0.98}",
+          "estado": "valida",
+          "datos": {
+            "categoria": "columna",
+            "confianza": 0.98
+          }
+        }
+      ]
+    },
+    "clasificar_intencion": {
+      "intentos": 3,
+      "exitos": 2,
+      "fallos_formato": 0,
+      "errores_api": 1,
+      "detalle": [
+        {
+          "intento": 1,
+          "estado": "error_api",
+          "error": "Error 503: This model is currently experiencing high demand. Spikes in demand are usually temporary. Please try again later."
+        },
+        {
+          "intento": 2,
+          "modelo_reportado": "gemini-3.6-flash",
+          "respuesta_original": "{\"categoria\":\"origen\",\"confianza\":0.98}",
+          "estado": "valida",
+          "datos": {
+            "categoria": "origen",
+            "confianza": 0.98
+          }
+        },
+        {
+          "intento": 3,
+          "modelo_reportado": "gemini-3.6-flash",
+          "respuesta_original": "{\"categoria\":\"origen\",\"confianza\":0.98}",
+          "estado": "valida",
+          "datos": {
+            "categoria": "origen",
+            "confianza": 0.98
+          }
+        }
+      ]
+    },
+    "clasificar_documentacion": {
+      "intentos": 3,
+      "exitos": 1,
+      "fallos_formato": 0,
+      "errores_api": 2,
+      "detalle": [
+        {
+          "intento": 1,
+          "estado": "error_api",
+          "error": "Error 503: This model is currently experiencing high demand. Spikes in demand are usually temporary. Please try again later."
+        },
+        {
+          "intento": 2,
+          "estado": "error_api",
+          "error": "Error 503: This model is currently experiencing high demand. Spikes in demand are usually temporary. Please try again later."
+        },
+        {
+          "intento": 3,
+          "modelo_reportado": "gemini-3.6-flash",
+          "respuesta_original": "{\"categoria\":\"incompleta\",\"confianza\":1}",
+          "estado": "valida",
+          "datos": {
+            "categoria": "incompleta",
+            "confianza": 1
+          }
+        }
+      ]
+    }
+  }
+}
