@@ -6,7 +6,7 @@ from dotenv import load_dotenv
 load_dotenv()
 
 URL_BASE = "https://generativelanguage.googleapis.com/v1beta/models/"
-ARCHIVO_SALIDA = "respuestas_completas.md"
+ARCHIVO_SALIDA = "../docs/respuestas_completas.md"
 
 # 1. Función: Validar y armar la petición
 def armar_peticion(pregunta, modelo):
@@ -73,12 +73,13 @@ def calcular_costo(datos, precio_entrada, precio_salida):
         return 0.0
 
 # 5. Función Central de ejecución
+#    Devuelve también el modelo que la API dice haber usado (modelVersion).
 def ejecutar_prueba(pregunta, modelo, precio_entrada, precio_salida):
     url, body = armar_peticion(pregunta, modelo)
     datos, latencia = enviar_peticion(url, body)
     costo = calcular_costo(datos, precio_entrada, precio_salida)
     respuesta = extraer_texto(datos)
-    return latencia, costo, respuesta
+    return latencia, costo, respuesta, datos.get("modelVersion")
 
 # Ejecución Principal
 if __name__ == "__main__":
@@ -89,10 +90,11 @@ if __name__ == "__main__":
         "Explica qué es un 'linaje de datos' (data lineage) en dbt, usando un lenguaje muy sencillo y una analogía para un analista de negocio que no sabe programar."
     ]
 
+    # Precios por token (USD): $0.75 / $3.75 por millón, tarifa estándar de pago
     modelos_a_comparar = {
-        "gemini-3.5-flash": {"in": 0.000000075, "out": 0.00000030},
-        "gemini-3.6-flash": {"in": 0.0000000375, "out": 0.00000015},
-        "gemini-3.8-flash": {"in": 0.00000125, "out": 0.00000500}
+        "gemini-3.5-flash": {"in": 0.00000075, "out": 0.00000375},
+        "gemini-3.6-flash": {"in": 0.00000075, "out": 0.00000375},
+        "gemini-3.8-flash": {"in": 0.00000075, "out": 0.00000375},
     }
 
     resultados = {m: [] for m in modelos_a_comparar}
@@ -110,12 +112,13 @@ if __name__ == "__main__":
 
         for i, pregunta in enumerate(preguntas_prueba, 1):
             try:
-                lat, costo, resp = ejecutar_prueba(
+                lat, costo, resp, version = ejecutar_prueba(
                     pregunta, nombre_modelo, precios["in"], precios["out"]
                 )
                 resultados[nombre_modelo].append((i, lat, costo))
 
                 print(f"  [Pregunta {i}]")
+                print(f"    - Modelo que respondió: {version}")
                 print(f"    - Latencia:  {lat:.2f} segundos")
                 print(f"    - Costo:     ${costo:.6f} USD")
                 print(f"    - Respuesta:\n{resp.strip()}\n")
@@ -123,14 +126,14 @@ if __name__ == "__main__":
                 with open(ARCHIVO_SALIDA, "a", encoding="utf-8") as f:
                     f.write(f"## {nombre_modelo} - Pregunta {i}\n\n")
                     f.write(f"**Pregunta:** {pregunta}\n\n")
-                    f.write(f"Latencia: {lat:.2f} s | Costo: ${costo:.6f} USD\n\n")
+                    f.write(f"Modelo que respondió: {version} | Latencia: {lat:.2f} s | Costo: ${costo:.6f} USD\n\n")
                     f.write(f"{resp.strip()}\n\n---\n\n")
             except Exception as e:
                 print(f"  [Pregunta {i}] Falló: {e}\n")
                 with open(ARCHIVO_SALIDA, "a", encoding="utf-8") as f:
                     f.write(f"## {nombre_modelo} - Pregunta {i}\n\nFalló: {e}\n\n---\n\n")
 
-            # Pausa para evitar el Error 429 de Rate Limit
+            # Pausa contra el Error 429
             time.sleep(15)
         print()
 
