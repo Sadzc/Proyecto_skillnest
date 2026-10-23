@@ -49,25 +49,35 @@ python3 -m pip --version
 
 ### 1.2 Instalar Git
 
-Git permite clonar el repositorio desde GitHub y registrar los cambios del proyecto. Si ya está instalado, puedes omitir este paso.
+Git permite clonar el repositorio desde GitHub y registrar los cambios del proyecto.
 
 **Windows**
 
-1. Descarga Git desde la [página oficial](https://git-scm.com/install/).
-2. Ejecuta el instalador y mantén las opciones predeterminadas si no sabes cuáles elegir.
-3. Abre PowerShell, Git Bash o la terminal de VS Code y verifica la instalación:
+Si Git ya está instalado, puedes omitir este paso. Para comprobarlo, abre PowerShell o la terminal de Windows:
 
-```bash
+1. Abre el menú Inicio y busca `PowerShell`.
+2. Ejecuta:
+
+```powershell
 git --version
 ```
 
-Como alternativa, puedes instalar Git desde PowerShell si tienes `winget` disponible:
+Si aparece un número de versión, Git ya está disponible.
+
+Si no está instalado, puedes elegir una de estas opciones:
+
+- **Instalador oficial:** descarga Git desde https://git-scm.com/install/ y sigue el asistente de instalación.
+- **PowerShell:** ejecuta el siguiente comando si tienes `winget` disponible:
 
 ```powershell
 winget install --id Git.Git -e
 ```
 
+Cuando termine, cierra y vuelve a abrir la terminal y ejecuta `git --version`.
+
 **Ubuntu / WSL**
+
+Abre la terminal de Ubuntu y ejecuta:
 
 ```bash
 sudo apt update
@@ -81,12 +91,15 @@ Abre la terminal y ejecuta:
 
 ```bash
 xcode-select --install
+```
+
+Cuando termine, verifica la instalación:
+
+```bash
 git --version
 ```
 
-Si aparece un número de versión, Git está disponible. Si acabas de instalarlo y no se reconoce el comando, abre una terminal nueva y vuelve a intentarlo.
-
-**Siguiente paso:** continúa con la clonación del repositorio desde GitHub.
+**Siguiente paso:** clona el repositorio desde GitHub siguiendo las instrucciones de la sección siguiente.
 
 ### 1.3 Editor opcional
 
