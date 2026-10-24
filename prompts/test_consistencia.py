@@ -52,6 +52,8 @@ def main():
                     raise SystemExit(f"Cuota agotada, no se guarda el registro: {error}")
                 resumen["errores_api"] += 1
                 detalle.update(estado="error_api", error=str(error))
+                resumen["detalle"].append(detalle)
+                print(f"{prompt['nombre']} - intento {intento}: {detalle['estado']}")
 
             else:
                 detalle["modelo_reportado"] = respuesta.get("modelVersion")
@@ -70,11 +72,8 @@ def main():
                     detalle.update(estado="valida", datos=datos)
 
                 resumen["detalle"].append(detalle)
-                if detalle["estado"] == "error_api":
-                    print(f"{prompt['nombre']} - intento {intento}: {detalle['error']}")
-                else:
-                    print(f"{prompt['nombre']} - intento {intento}: {detalle['estado']}")
-            
+                print(f"{prompt['nombre']} - intento {intento}: {detalle['estado']}")
+
         time.sleep(10)
 
         print(
