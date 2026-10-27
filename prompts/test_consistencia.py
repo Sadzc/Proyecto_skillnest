@@ -46,7 +46,7 @@ def main():
                 respuesta = enviar_peticion(url, body)
                 texto = extraer_texto(respuesta)
 
-            except RuntimeError as error:
+            except (RuntimeError, TimeoutError) as error:
                 # Cuota diaria agotada: se corta sin tocar el registro anterior
                 if str(error).startswith("Error 429"):
                     raise SystemExit(f"Cuota agotada, no se guarda el registro: {error}")
