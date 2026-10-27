@@ -10,6 +10,8 @@ load_dotenv()
 # Variables
 MODELO = "gemini-3.6-flash"
 URL_BASE = "https://generativelanguage.googleapis.com/v1beta/models/"
+PRECIO_ENTRADA = 0.00000075
+PRECIO_SALIDA = 0.00000375
 
 
 # 1. Función: Validar y armar la petición
@@ -40,25 +42,28 @@ def armar_peticion(pregunta, system_instruction=None, response_schema=None):
 def enviar_peticion(url, body):
     try:
         respuesta = requests.post(url, json=body, timeout=60)
-    except requests.exceptions.Timeout:
-        raise RuntimeError("El servicio tardó demasiado en responder. Intenta de nuevo.")
-    except requests.exceptions.ConnectionError:
-        raise RuntimeError("No se pudo conectar con el servicio. Intenta de nuevo en unos segundos.")
+    except (requests.exceptions.Timeout, requests.exceptions.ConnectionError):
+        raise TimeoutError("No se pudo contactar al servicio. Puede ser momentáneo.")
 
     if not respuesta.ok:
-        # Se incluye el mensaje de la API: así se distingue un 429 (cuota),
-        # un 503 (saturación) y un 403 (credencial).
         try:
             detalle = respuesta.json().get("error", {}).get("message", "")
         except (ValueError, AttributeError):
             detalle = ""
-        raise RuntimeError(f"Error {respuesta.status_code}: {detalle}")
+        mensaje = f"Error {respuesta.status_code}: {detalle}"
+
+        if respuesta.status_code in (401, 403) or (
+            respuesta.status_code == 400 and "API key" in detalle
+        ):
+            raise ValueError(mensaje)
+        if respuesta.status_code == 429 or respuesta.status_code >= 500:
+            raise TimeoutError(mensaje)
+        raise RuntimeError(mensaje)
 
     try:
         return respuesta.json()
     except requests.exceptions.JSONDecodeError:
         raise RuntimeError("La respuesta del servicio no llegó en el formato esperado.")
-
 
 # 3. Función: Procesar y extraer el texto generado
 def extraer_texto(datos):
@@ -112,7 +117,7 @@ def calcular_costo(datos, precio_entrada, precio_salida):
 def obtener_dato_de_prueba(pregunta):
     url, body = armar_peticion(pregunta)
     datos = enviar_peticion(url, body)
-    costo = calcular_costo(datos, 0.00000075, 0.00000375)
+    costo = calcular_costo(datos, PRECIO_ENTRADA, PRECIO_SALIDA)
     print(f"Costo de la petición: ${costo:.6f} USD")
     return extraer_texto(datos)
 
@@ -123,5 +128,5 @@ if __name__ == "__main__":
     try:
         resultado = obtener_dato_de_prueba(pregunta_prueba)
         print(resultado)
-    except (ValueError, RuntimeError, KeyError) as error:
+    except (ValueError, RuntimeError, KeyError, TimeoutError) as error:
         print("No se pudo completar la operación:", error)
