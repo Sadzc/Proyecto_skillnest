@@ -23,26 +23,31 @@ def con_reintento(
     for intento in range(1, intentos + 1):
         try:
             return funcion()
-        except TimeoutError:
+        except TimeoutError as error:
             if intento == intentos:
                 raise
             espera = min(espera_base * (2 ** (intento - 1)), espera_maxima)
             espera += random.uniform(0, espera * 0.1)  # jitter
-            print(f"Intento {intento} de {intentos} falló. Reintentando en {espera:.1f}s...")
+            print(f"Intento {intento} de {intentos} falló ({error}). Reintentando en {espera:.1f}s...")
             time.sleep(espera)
 
 
-def consultar_modelo(pregunta: str, system_instruction=None, response_schema=None) -> str:
+def registrar_costo(datos: dict) -> float:
     global costo_total_sesion
+    costo = calcular_costo(datos, PRECIO_ENTRADA, PRECIO_SALIDA)
+    costo_total_sesion += costo
+    print(f"Costo: ${costo:.6f} USD (acumulado: ${costo_total_sesion:.6f})")
+    return costo
+
+
+def consultar_modelo(pregunta: str, system_instruction=None, response_schema=None) -> str:
     url, cuerpo = armar_peticion(pregunta, system_instruction, response_schema)
     try:
         datos = con_reintento(lambda: enviar_peticion(url, cuerpo))
     except TimeoutError:
         raise RuntimeError("El servicio no respondió tras varios intentos. Intenta más tarde.")
 
-    costo = calcular_costo(datos, PRECIO_ENTRADA, PRECIO_SALIDA)
-    costo_total_sesion += costo
-    print(f"Costo: ${costo:.6f} USD (acumulado: ${costo_total_sesion:.6f})")
+    registrar_costo(datos)
     return extraer_texto(datos)
 
 
