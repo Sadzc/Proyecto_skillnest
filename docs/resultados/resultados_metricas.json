@@ -1,0 +1,26 @@
+[
+  {
+    "consulta": "¿Qué significa la columna id_venta?",
+    "referencia": "id_venta es el identificador único de la venta.",
+    "respuesta": "La columna `id_venta` representa el identificador único de la venta.",
+    "precision": 0.7,
+    "cobertura": 0.875,
+    "f1": 0.778
+  },
+  {
+    "consulta": "¿Qué descripción tiene el modelo fact_ventas?",
+    "referencia": "El modelo fact_ventas es la tabla de hechos de ventas.",
+    "respuesta": "El modelo fact_ventas tiene la descripción \"Tabla de hechos de ventas.\"",
+    "precision": 0.818,
+    "cobertura": 0.9,
+    "f1": 0.857
+  },
+  {
+    "consulta": "¿Qué columna no tiene descripción?",
+    "referencia": "La columna monto_total no tiene descripción.",
+    "respuesta": "La columna `monto_total` no tiene descripción.",
+    "precision": 1.0,
+    "cobertura": 1.0,
+    "f1": 1.0
+  }
+]
