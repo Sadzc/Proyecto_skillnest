@@ -20,6 +20,74 @@ CASOS = [
         "consulta": "¿Qué columna no tiene descripción?",
         "referencia": "La columna monto_total no tiene descripción.",
     },
+    {
+        "consulta": "¿Qué descripción tiene la columna id_venta?",
+        "referencia": "La columna id_venta tiene la descripción identificador único de la venta.",
+    },
+    {
+        "consulta": "¿Tiene la columna monto_total una descripción?",
+        "referencia": "No, la columna monto_total no tiene descripción.",
+    },
+    {
+        "consulta": "¿Qué columnas tiene el modelo fact_ventas?",
+        "referencia": "El modelo fact_ventas tiene las columnas id_venta y monto_total.",
+    },
+    {
+        "consulta": "¿Cuántas columnas tiene fact_ventas?",
+        "referencia": "El modelo fact_ventas tiene dos columnas.",
+    },
+    {
+        "consulta": "¿Qué versión de esquema usa el archivo?",
+        "referencia": "El archivo usa la versión 2.",
+    },
+    {
+        "consulta": "¿Cómo se llama el modelo documentado?",
+        "referencia": "El modelo documentado se llama fact_ventas.",
+    },
+    {
+        "consulta": "¿Para qué sirve id_venta?",
+        "referencia": "id_venta identifica de forma única cada venta.",
+    },
+    {
+        "consulta": "¿Qué columnas sí tienen descripción?",
+        "referencia": "Solo la columna id_venta tiene descripción.",
+    },
+    {
+        "consulta": "¿Está documentada la columna monto_total?",
+        "referencia": "No, la columna monto_total no está documentada.",
+    },
+    {
+        "consulta": "¿Qué tests tiene el modelo fact_ventas?",
+        "referencia": "El fragmento no define tests para fact_ventas.",
+    },
+    {
+        "consulta": "¿De qué tabla sale la métrica de ingresos netos?",
+        "referencia": "El fragmento no indica de qué tabla sale la métrica de ingresos netos.",
+    },
+    {
+        "consulta": "¿Qué significa la columna monto_total?",
+        "referencia": "El fragmento no incluye una descripción de la columna monto_total.",
+    },
+    {
+        "consulta": "¿El modelo fact_ventas tiene descripción?",
+        "referencia": "Sí, el modelo fact_ventas tiene la descripción Tabla de hechos de ventas.",
+    },
+    {
+        "consulta": "¿Qué tipo de dato tiene id_venta?",
+        "referencia": "El fragmento no indica el tipo de dato de id_venta.",
+    },
+    {
+        "consulta": "¿Está completa la documentación del fragmento?",
+        "referencia": "No, está incompleta porque a la columna monto_total le falta la descripción.",
+    },
+    {
+        "consulta": "¿Cuál es la columna que identifica cada venta?",
+        "referencia": "La columna id_venta identifica cada venta.",
+    },
+    {
+        "consulta": "¿Cuántas columnas tienen descripción?",
+        "referencia": "Una sola columna, id_venta, tiene descripción.",
+    },
 ]
 
 RUTA_REGISTRO = Path(__file__).resolve().parent / "docs" / "registro_pipeline_texto.md"

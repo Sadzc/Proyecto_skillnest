@@ -1,0 +1,45 @@
+import json
+
+revision_manual = [
+    {"consulta": "¿Para qué sirve id_venta?", "f1": 0.316,
+     "correccion_factual": "si", "completitud": "si", "contradiccion": "no",
+     "nota": "Paráfrasis correcta (identifica de forma única = identificador único). F1 bajo solo por distinto vocabulario y relleno como 'Según el esquema'."},
+    {"consulta": "¿Qué columnas sí tienen descripción?", "f1": 0.417,
+     "correccion_factual": "si", "completitud": "si", "contradiccion": "no",
+     "nota": "Dice lo mismo que la referencia (solo id_venta) y además cita su descripción, que es correcta. F1 bajo por respuesta más larga."},
+    {"consulta": "¿Qué tests tiene el modelo fact_ventas?", "f1": 0.421,
+     "correccion_factual": "si", "completitud": "si", "contradiccion": "no",
+     "nota": "Correcto: dice que no hay tests, igual que la referencia, con otras palabras (no define vs no tiene definido). No inventó tests."},
+    {"consulta": "¿Cuál es la columna que identifica cada venta?", "f1": 0.480,
+     "correccion_factual": "si", "completitud": "si", "contradiccion": "no",
+     "nota": "Acierta id_venta y agrega su descripción, que es verdadera. F1 penalizado por la verbosidad."},
+    {"consulta": "¿De qué tabla sale la métrica de ingresos netos?", "f1": 0.486,
+     "correccion_factual": "si", "completitud": "si", "contradiccion": "no",
+     "nota": "Reconoce que el fragmento no menciona esa métrica y no inventa una tabla. Agrega contexto verdadero (fact_ventas, id_venta, monto_total). Sin F1 alto aunque es la conducta ideal."},
+    {"consulta": "¿El modelo fact_ventas tiene descripción?", "f1": 0.880,
+     "correccion_factual": "si", "completitud": "si", "contradiccion": "no",
+     "nota": "Acierto real: responde sí y cita la descripción correcta. El F1 alto es merecido."},
+    {"consulta": "¿Qué columna no tiene descripción?", "f1": 1.0,
+     "correccion_factual": "si", "completitud": "si", "contradiccion": "no",
+     "nota": "Idéntica a la referencia, incluida la negación. F1 perfecto es acierto real."},
+    {"consulta": "¿Qué descripción tiene la columna id_venta?", "f1": 1.0,
+     "correccion_factual": "si", "completitud": "si", "contradiccion": "no",
+     "nota": "Coincide con la referencia y la descripción citada es la del schema. Acierto real."},
+    {"consulta": "¿Qué columnas tiene el modelo fact_ventas?", "f1": 1.0,
+     "correccion_factual": "si", "completitud": "si", "contradiccion": "no",
+     "nota": "Menciona las dos columnas (id_venta y monto_total). Acierto real."},
+    {"consulta": "¿Cómo se llama el modelo documentado?", "f1": 1.0,
+     "correccion_factual": "si", "completitud": "si", "contradiccion": "no",
+     "nota": "Nombre correcto (fact_ventas). Acierto real."},
+    {"consulta": "¿Cuántas columnas tiene fact_ventas?", "f1": 0.526,
+     "correccion_factual": "si", "completitud": "si", "contradiccion": "no",
+     "nota": "Responde '2 columnas' y lista id_venta y monto_total, correcto. La referencia dice 'dos': la métrica no reconoce que '2' y 'dos' son lo mismo."},
+    {"consulta": "¿Tiene la columna monto_total una descripción?", "f1": 0.636,
+     "correccion_factual": "si", "completitud": "si", "contradiccion": "no",
+     "nota": "Mantiene la negación ('no tiene una descripción definida'), correcto. F1 medio por relleno ('según el fragmento proporcionado de schema.yml')."},
+]
+
+with open("revision_manual.json", "w", encoding="utf-8") as archivo:
+    json.dump(revision_manual, archivo, indent=2, ensure_ascii=False)
+
+print(f"Guardados {len(revision_manual)} casos en revision_manual.json")

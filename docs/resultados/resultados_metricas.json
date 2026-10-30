@@ -22,5 +22,141 @@
     "precision": 1.0,
     "cobertura": 1.0,
     "f1": 1.0
+  },
+  {
+    "consulta": "¿Qué descripción tiene la columna id_venta?",
+    "referencia": "La columna id_venta tiene la descripción identificador único de la venta.",
+    "respuesta": "La columna id_venta tiene la descripción \"Identificador único de la venta.\"",
+    "precision": 1.0,
+    "cobertura": 1.0,
+    "f1": 1.0
+  },
+  {
+    "consulta": "¿Tiene la columna monto_total una descripción?",
+    "referencia": "No, la columna monto_total no tiene descripción.",
+    "respuesta": "No, según el fragmento proporcionado de schema.yml, la columna monto_total no tiene una descripción definida.",
+    "precision": 0.467,
+    "cobertura": 1.0,
+    "f1": 0.636
+  },
+  {
+    "consulta": "¿Qué columnas tiene el modelo fact_ventas?",
+    "referencia": "El modelo fact_ventas tiene las columnas id_venta y monto_total.",
+    "respuesta": "El modelo fact_ventas tiene las columnas `id_venta` y `monto_total`.",
+    "precision": 1.0,
+    "cobertura": 1.0,
+    "f1": 1.0
+  },
+  {
+    "consulta": "¿Cuántas columnas tiene fact_ventas?",
+    "referencia": "El modelo fact_ventas tiene dos columnas.",
+    "respuesta": "Según el fragmento proporcionado, el modelo fact_ventas tiene 2 columnas: id_venta y monto_total.",
+    "precision": 0.385,
+    "cobertura": 0.833,
+    "f1": 0.526
+  },
+  {
+    "consulta": "¿Qué versión de esquema usa el archivo?",
+    "referencia": "El archivo usa la versión 2.",
+    "respuesta": "El archivo utiliza la versión 2 del esquema.",
+    "precision": 0.625,
+    "cobertura": 0.833,
+    "f1": 0.714
+  },
+  {
+    "consulta": "¿Cómo se llama el modelo documentado?",
+    "referencia": "El modelo documentado se llama fact_ventas.",
+    "respuesta": "El modelo documentado se llama `fact_ventas`.",
+    "precision": 1.0,
+    "cobertura": 1.0,
+    "f1": 1.0
+  },
+  {
+    "consulta": "¿Para qué sirve id_venta?",
+    "referencia": "id_venta identifica de forma única cada venta.",
+    "respuesta": "Según el esquema, `id_venta` sirve como el identificador único de la venta.",
+    "precision": 0.25,
+    "cobertura": 0.429,
+    "f1": 0.316
+  },
+  {
+    "consulta": "¿Qué columnas sí tienen descripción?",
+    "referencia": "Solo la columna id_venta tiene descripción.",
+    "respuesta": "La única columna que tiene descripción es `id_venta`, la cual está descrita como \"Identificador único de la venta.\".",
+    "precision": 0.278,
+    "cobertura": 0.833,
+    "f1": 0.417
+  },
+  {
+    "consulta": "¿Está documentada la columna monto_total?",
+    "referencia": "No, la columna monto_total no está documentada.",
+    "respuesta": "No, la columna `monto_total` no está documentada, ya que en el fragmento solo se lista su nombre sin incluir ninguna descripción.",
+    "precision": 0.333,
+    "cobertura": 1.0,
+    "f1": 0.5
+  },
+  {
+    "consulta": "¿Qué tests tiene el modelo fact_ventas?",
+    "referencia": "El fragmento no define tests para fact_ventas.",
+    "respuesta": "Según el fragmento proporcionado, el modelo `fact_ventas` no tiene ningún test definido.",
+    "precision": 0.333,
+    "cobertura": 0.571,
+    "f1": 0.421
+  },
+  {
+    "consulta": "¿De qué tabla sale la métrica de ingresos netos?",
+    "referencia": "El fragmento no indica de qué tabla sale la métrica de ingresos netos.",
+    "respuesta": "En el fragmento proporcionado no se menciona ninguna métrica de ingresos netos. Únicamente se incluye la tabla `fact_ventas` con las columnas `id_venta` y `monto_total`.",
+    "precision": 0.375,
+    "cobertura": 0.692,
+    "f1": 0.486
+  },
+  {
+    "consulta": "¿Qué significa la columna monto_total?",
+    "referencia": "El fragmento no incluye una descripción de la columna monto_total.",
+    "respuesta": "El fragmento proporcionado de schema.yml no incluye una descripción ni especifica el significado para la columna `monto_total`.",
+    "precision": 0.588,
+    "cobertura": 1.0,
+    "f1": 0.741
+  },
+  {
+    "consulta": "¿El modelo fact_ventas tiene descripción?",
+    "referencia": "Sí, el modelo fact_ventas tiene la descripción Tabla de hechos de ventas.",
+    "respuesta": "Sí, el modelo `fact_ventas` tiene descripción y es \"Tabla de hechos de ventas.\".",
+    "precision": 0.846,
+    "cobertura": 0.917,
+    "f1": 0.88
+  },
+  {
+    "consulta": "¿Qué tipo de dato tiene id_venta?",
+    "referencia": "El fragmento no indica el tipo de dato de id_venta.",
+    "respuesta": "En el fragmento proporcionado de schema.yml no se especifica el tipo de dato de `id_venta`.",
+    "precision": 0.6,
+    "cobertura": 0.9,
+    "f1": 0.72
+  },
+  {
+    "consulta": "¿Está completa la documentación del fragmento?",
+    "referencia": "No, está incompleta porque a la columna monto_total le falta la descripción.",
+    "respuesta": "No, la documentación del fragmento no está completa porque la columna `monto_total` carece de una descripción.",
+    "precision": 0.5,
+    "cobertura": 0.667,
+    "f1": 0.571
+  },
+  {
+    "consulta": "¿Cuál es la columna que identifica cada venta?",
+    "referencia": "La columna id_venta identifica cada venta.",
+    "respuesta": "La columna que identifica cada venta es `id_venta`, la cual está descrita como el identificador único de la venta.",
+    "precision": 0.316,
+    "cobertura": 1.0,
+    "f1": 0.48
+  },
+  {
+    "consulta": "¿Cuántas columnas tienen descripción?",
+    "referencia": "Una sola columna, id_venta, tiene descripción.",
+    "respuesta": "En el fragmento proporcionado, solo una columna (`id_venta`) tiene descripción.",
+    "precision": 0.5,
+    "cobertura": 0.833,
+    "f1": 0.625
   }
 ]
