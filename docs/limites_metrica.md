@@ -21,7 +21,7 @@ Observados en mi revisión (falsos negativos: respuesta correcta, F1 bajo):
 - **Números escritos distinto.** "dos" y "2" cuentan como palabras distintas.
   Ejemplo: "¿Cuántas columnas tiene fact_ventas?", F1 0.526, respuesta correcta.
 - **Respuestas del tipo "el fragmento no dice X".** Es la conducta deseada
-  (no inventar), pero puntúa bajo o medio (0.49 a 0.74), porque el modelo
+  (no inventar), pero puntúa bajo o medio (0.42 a 0.74), porque el modelo
   explica por qué.
   Ejemplo: "¿De qué tabla sale la métrica de ingresos netos?", F1 0.486.
 
