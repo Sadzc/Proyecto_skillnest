@@ -145,6 +145,7 @@ class CapturadorError(BaseCallbackHandler):
 
 manejador_error = CapturadorError()
 
+# Reemplaza la actual procesar_pregunta por esta versión
 def procesar_pregunta(cadena, pregunta: str, contexto: str) -> str:
     try:
         return cadena.invoke(
@@ -154,7 +155,7 @@ def procesar_pregunta(cadena, pregunta: str, contexto: str) -> str:
     except Exception as error:
         logger.error("Error procesando pregunta: %s", error)
         return "No pudimos procesar tu pregunta en este momento. Intenta de nuevo más tarde."
-
+    
 def construir_paso_clasificacion(modelo):
     return (
         plantilla_clasificacion
@@ -186,6 +187,12 @@ def construir_cadena_con_enrutamiento(
         RunnablePassthrough.assign(clasificacion=paso_clasificacion)
         | bifurcacion
     )
+
+def construir_cadena_robusta(cadena):
+    return cadena.with_fallbacks([respuesta_generica])
+
+def construir_cadena_robusta(cadena):
+    return cadena.with_fallbacks([respuesta_generica], exception_key="error")
 
 if __name__ == "__main__":
     preguntas_prueba = [

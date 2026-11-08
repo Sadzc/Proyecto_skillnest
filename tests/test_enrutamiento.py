@@ -6,15 +6,18 @@ sys.path.insert(0, str(RAIZ))
 
 from unittest.mock import MagicMock
 from langchain_core.messages import AIMessage
+from langchain_core.runnables import RunnableLambda
 import pytest
 
 from src.enrutamiento import (
     construir_paso_clasificacion,
     construir_cadena_con_enrutamiento,
+    construir_cadena_robusta,
+    procesar_pregunta,
 )
 
 
-# --- Pruebas de enrutamiento ---
+# --- Pruebas de enrutamiento (Bloque 19) ---
 
 def test_enrutamiento_va_a_cadena_definicion():
     clasificacion_falsa = MagicMock()
@@ -101,3 +104,37 @@ def test_clasificacion_normaliza_mayusculas_y_espacios():
     )
 
     assert resultado == "definicion"
+
+
+# --- Pruebas de manejo de errores (Bloque 20) ---
+
+def test_cadena_usa_fallback_ante_fallo_del_modelo():
+    def fallar_a_proposito(x):
+        raise ConnectionError("simulado")
+
+    cadena_rota = RunnableLambda(fallar_a_proposito)
+    cadena_segura = construir_cadena_robusta(cadena_rota)
+
+    resultado = cadena_segura.invoke({
+        "pregunta": "¿Qué significa algo?",
+        "contexto": "fragmento de prueba"
+    })
+
+    assert "no pude" in resultado.lower()
+
+
+def test_procesar_pregunta_no_propaga_excepciones():
+    clasificacion_falsa = MagicMock()
+    clasificacion_falsa.side_effect = ConnectionError("simulado")
+
+    cadena_falsa = construir_cadena_con_enrutamiento(
+        paso_clasificacion=clasificacion_falsa,
+    )
+
+    resultado = procesar_pregunta(
+        cadena_falsa,
+        pregunta="¿Qué significa algo?",
+        contexto="fragmento de prueba"
+    )
+
+    assert "no pudimos" in resultado.lower()
