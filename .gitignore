@@ -20,3 +20,4 @@ Thumbs.db
 # Logs
 *.log
 venv/
+trazas_agente.jsonl
