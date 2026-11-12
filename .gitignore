@@ -19,5 +19,6 @@ Thumbs.db
 
 # Logs
 *.log
-venv/
-trazas_agente.jsonl
+
+# Vector store generado (se reconstruye con indexar_corpus.py)
+vectorstore/

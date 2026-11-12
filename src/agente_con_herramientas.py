@@ -69,12 +69,12 @@ def registrar_traza(session_id: str, entrada: str, resultado: dict) -> None:
         ],
         "respuesta_final": resultado.get("output", "")
     }
-    with open("trazas_agente.jsonl", "a", encoding="utf-8") as archivo:
+    with open(os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "trazas_agente.jsonl"), "a", encoding="utf-8") as archivo:
         archivo.write(json.dumps(registro, ensure_ascii=False) + "\n")
 
 
 def marcar_repeticiones_sospechosas(
-    archivo: str = "trazas_agente.jsonl",
+    archivo: str = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "trazas_agente.jsonl"),
 ) -> None:
     """Recorre un archivo de trazas y marca las sesiones donde la misma
     herramienta se invocó varias veces seguidas: candidato a revisar a mano,
