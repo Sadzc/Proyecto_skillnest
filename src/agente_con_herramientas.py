@@ -2,6 +2,7 @@ import os
 import queue
 import threading
 import json
+import time
 from datetime import datetime, timezone
 
 from dotenv import load_dotenv
@@ -14,7 +15,6 @@ from langchain_core.runnables.history import RunnableWithMessageHistory
 from langchain_google_genai import ChatGoogleGenerativeAI
 from langchain_classic.agents import AgentExecutor, create_tool_calling_agent
 
-# === Configuraciones e Inicializaciones ===
 load_dotenv()
 
 clave = os.getenv("GEMINI_API_KEY")
@@ -27,11 +27,11 @@ modelo = ChatGoogleGenerativeAI(
     model=nombre_modelo,
     api_key=clave,
     temperature=0,
-    timeout=20,
-    max_retries=0,
+    timeout=60,
+    max_retries=3,
 )
 
-# === Base de Datos (simulación del schema.yml del DWH) ===
+# Base de Datos (simulación del schema.yml del DWH)
 SCHEMA = {
     "fct_revenue": {
         "descripcion": "Tabla de hechos con los ingresos diarios por ruta.",
@@ -53,7 +53,7 @@ SCHEMA = {
     },
 }
 
-# === Persistencia y Análisis de Trazabilidad ===
+# Persistencia y Análisis de Trazabilidad
 def registrar_traza(session_id: str, entrada: str, resultado: dict) -> None:
     registro = {
         "timestamp": datetime.now(timezone.utc).isoformat(),
@@ -72,7 +72,38 @@ def registrar_traza(session_id: str, entrada: str, resultado: dict) -> None:
     with open("trazas_agente.jsonl", "a", encoding="utf-8") as archivo:
         archivo.write(json.dumps(registro, ensure_ascii=False) + "\n")
 
-# === Auditoría / Human in the Loop ===
+
+def marcar_repeticiones_sospechosas(
+    archivo: str = "trazas_agente.jsonl",
+) -> None:
+    """Recorre un archivo de trazas y marca las sesiones donde la misma
+    herramienta se invocó varias veces seguidas: candidato a revisar a mano,
+    no una conclusión definitiva."""
+    try:
+        with open(archivo, encoding="utf-8") as f:
+            registros = [json.loads(linea) for linea in f]
+    except FileNotFoundError:
+        print(
+            f"No se encontró '{archivo}'. Corre "
+            "registrar_traza al menos una vez antes "
+            "de revisar repeticiones."
+        )
+        return
+
+    for registro in registros:
+        herramientas_usadas = [
+            a["herramienta"]
+            for a in registro.get("acciones", [])
+        ]
+        for i in range(1, len(herramientas_usadas)):
+            if herramientas_usadas[i] == herramientas_usadas[i - 1]:
+                print(
+                    f"Revisar: {registro['session_id']} usó "
+                    f"'{herramientas_usadas[i]}' dos veces seguidas"
+                )
+                break
+
+# Auditoría / Human in the Loop
 registro_aprobaciones = []
 
 def esperar_aprobacion(mensaje: str, tiempo_limite_segundos: int = 15) -> bool:
@@ -103,7 +134,7 @@ def registrar_aprobacion(herramienta: str, argumentos: dict, aprobado: bool) -> 
         "fecha_hora": datetime.now().isoformat()
     })
 
-# === Esquemas de Validación (args_schema) ===
+# Esquemas de Validación (args_schema)
 class ArgumentosBusquedaColumna(BaseModel):
     """
     Esquema para buscar una columna específica dentro de un modelo del DWH.
@@ -122,7 +153,7 @@ class ArgumentosBusquedaColumna(BaseModel):
         )
     )
 
-# === Herramientas ===
+# Herramientas
 @tool
 def buscar_modelo(nombre_modelo: str) -> str:
     """Busca la descripción y las columnas de un modelo del
@@ -250,7 +281,7 @@ def solicitar_redocumentacion(nombre_modelo: str, motivo: str) -> str:
 # Listado de herramientas
 herramientas = [buscar_modelo, calcular_cobertura, buscar_columna_en_modelo, solicitar_redocumentacion]
 
-# === Gestión de historial en memoria ===
+# Gestión de historial en memoria
 historiales = {}
 
 def obtener_historial(session_id: str):
@@ -258,7 +289,7 @@ def obtener_historial(session_id: str):
         historiales[session_id] = InMemoryChatMessageHistory()
     return historiales[session_id]
 
-# === Construcción del agente ===
+# Construcción del agente
 instrucciones = (
     "Eres un asistente que ayuda a equipos de datos a entender "
     "la documentación del data warehouse. Responde en español. "
@@ -314,13 +345,17 @@ agente_con_memoria = RunnableWithMessageHistory(
 )
 
 
-# === Ejecución ===
+# Ejecución
 if __name__ == "__main__":
+    # Pausa entre preguntas: el free tier de Gemini permite 5 llamadas por
+    # minuto y cada pregunta al agente usa 2 (elegir herramienta + responder).
+    PAUSA_SEGUNDOS = 30
+
     modelos_disponibles = ", ".join(SCHEMA.keys())
     print("Asistente de documentación del data warehouse")
     print("Modelos disponibles:", modelos_disponibles)
 
-    # --- Prueba 1: memoria entre turnos (mismo session_id) ---
+    # Prueba 1: memoria entre turnos (mismo session_id)
     print("\n=== Prueba 1: memoria entre turnos ===")
     config1 = {"configurable": {"session_id": "analista_001"}}
 
@@ -328,13 +363,15 @@ if __name__ == "__main__":
     resultado1 = agente_con_memoria.invoke({"entrada": entrada1}, config1)
     print("Turno 1:", resultado1["output"])
     registrar_traza("analista_001", entrada1, resultado1)
+    time.sleep(PAUSA_SEGUNDOS)
 
     entrada2 = "¿Y ese mismo modelo, qué cobertura de documentación tiene?"
     resultado2 = agente_con_memoria.invoke({"entrada": entrada2}, config1)
     print("Turno 2:", resultado2["output"])
     registrar_traza("analista_001", entrada2, resultado2)
+    time.sleep(PAUSA_SEGUNDOS)
 
-    # --- Prueba 2: args_schema (buscar columna específica) ---
+    # Prueba 2: args_schema (buscar columna específica)
     print("\n=== Prueba 2: buscar columna con args_schema ===")
     config2 = {"configurable": {"session_id": "analista_002"}}
 
@@ -342,24 +379,30 @@ if __name__ == "__main__":
     resultado3 = agente_con_memoria.invoke({"entrada": entrada3}, config2)
     print("Turno 3:", resultado3["output"])
     registrar_traza("analista_002", entrada3, resultado3)
+    time.sleep(PAUSA_SEGUNDOS)
 
-    # --- Prueba 3: aislamiento de sesiones ---
+    # Prueba 3: aislamiento de sesiones
     print("\n=== Prueba 3: aislamiento de sesiones ===")
     config3 = {"configurable": {"session_id": "analista_003"}}
     entrada4 = "¿De qué modelo te pregunté antes?"
     resultado4 = agente_con_memoria.invoke({"entrada": entrada4}, config3)
     print("Turno 4 (sesión nueva, no debería saber):", resultado4["output"])
+    time.sleep(PAUSA_SEGUNDOS)
 
-    # --- Prueba 4: human-in-the-loop ---
-    # Descomenta para probar la aprobación interactiva:
-    # print("\n=== Prueba 4: solicitar re-documentación ===")
-    # config4 = {"configurable": {"session_id": "analista_004"}}
-    # entrada5 = (
-    #     "El modelo dim_routes tiene columnas sin documentar. "
-    #     "Por favor solicita que lo re-documenten."
-    # )
-    # resultado5 = agente_con_memoria.invoke({"entrada": entrada5}, config4)
-    # print("Turno 5:", resultado5["output"])
-    # print("\nRegistros de aprobaciones:")
-    # for r in registro_aprobaciones:
-    #     print(r)
+    # Prueba 4: human-in-the-loop
+    print("\n=== Prueba 4: solicitar re-documentación ===")
+    config4 = {"configurable": {"session_id": "analista_004"}}
+    entrada5 = (
+        "El modelo dim_routes tiene columnas sin documentar. "
+        "Por favor solicita que lo re-documenten."
+    )
+    resultado5 = agente_con_memoria.invoke({"entrada": entrada5}, config4)
+    print("Turno 5:", resultado5["output"])
+    registrar_traza("analista_004", entrada5, resultado5)
+    print("\nRegistros de aprobaciones:")
+    for r in registro_aprobaciones:
+        print(r)
+
+    # Revisión de trazas: marcar repeticiones sospechosas
+    print("\n=== Revisión de trazas ===")
+    marcar_repeticiones_sospechosas()
