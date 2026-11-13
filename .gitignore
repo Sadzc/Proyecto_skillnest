@@ -20,5 +20,7 @@ Thumbs.db
 # Logs
 *.log
 
-# Vector store generado (se reconstruye con indexar_corpus.py)
+# Vector stores generados (se reconstruyen con src/indexar_corpus.py)
 vectorstore/
+chroma_db/
+vectorstore_ejemplo/
