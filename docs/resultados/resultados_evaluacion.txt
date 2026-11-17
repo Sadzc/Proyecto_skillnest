@@ -1,0 +1,16 @@
+Fecha: 2026-11-17
+Configuracion: k=3, chunk_size=400, chunk_overlap=20
+
+0.33  1.00  cada cuanto se genera una fila en la tabla de ingresos
+0.33  1.00  que campo identifica de forma unica a cada ruta
+0.33  1.00  con que tabla se relaciona el identificador de ruta
+0.33  1.00  en que moneda se registran los ingresos del dia
+0.33  1.00  cuanta gente viajo en una ruta en un dia determinado
+0.33  1.00  que contiene el catalogo de rutas del sistema
+0.33  1.00  que ciudad es el punto de partida de una ruta
+0.33  1.00  como se llama el campo con la ciudad de llegada
+0.33  1.00  que columna del catalogo de rutas no esta documentada
+0.67  0.67  que columnas tiene la tabla de hechos de ingresos
+0.00  n/a  cual es el margen de ganancia por ruta
+
+promedio -> precision: 0.333  recall: 0.967
